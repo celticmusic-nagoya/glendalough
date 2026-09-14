@@ -2504,15 +2504,3 @@ button {
     height: 30px !important;
   }
 }
-
-
-/* ==========================================
-   スマホ表示時に Scroll 表示（線・文字）を非表示にする
-   ========================================== */
-@media screen and (max-width: 600px) {
-  .hero-scroll,
-  .scroll-line,
-  .scroll-text {
-    display: none !important;
-  }
-}
