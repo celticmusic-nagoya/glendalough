@@ -2486,3 +2486,21 @@ button {
     height: auto !important;
   }
 }
+
+/* スマホ表示時に SCROLL の表示位置を下げる設定 */
+@media screen and (max-width: 600px) {
+  /* HEROセクション全体の上下パディングを詰めてボタンの位置を上げる */
+  .hero-content {
+    padding-bottom: 80px !important;
+  }
+
+  /* SCROLLアイコンを下端ギリギリに下げる */
+  .hero-scroll {
+    bottom: 10px !important;
+  }
+
+  /* SCROLLの縦線を少し短くして省スペース化 */
+  .scroll-line {
+    height: 30px !important;
+  }
+}
