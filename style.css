@@ -2470,3 +2470,19 @@ button {
     margin-bottom: 1rem;
   }
 }
+
+/* スマホ表示時にロゴの親要素と画像を画面内に収める設定 */
+@media (max-width: 768px) {
+  /* 親要素の幅を画面幅内に制限する */
+  .hero-symbol {
+    width: 80% !important;     /* 画面幅の80%に指定（お好みで調整可） */
+    max-width: 300px !important;/* 大きくなりすぎない上限サイズ */
+    margin: 0 auto !important; /* 中央寄せ */
+  }
+
+  /* 画像自体も親要素に合わせて伸縮 */
+  .hero-symbol img {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
