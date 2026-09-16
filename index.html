@@ -23,10 +23,10 @@
   <link rel="preload" as="image" href="images/hero2.jpg">
   <link rel="stylesheet" href="style.css">
 
-<!-- Favicon & Touch Icons -->
-<link rel="icon" href="images/favicon.ico" sizes="any">
-<link rel="icon" href="images/favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <!-- Favicon & Touch Icons -->
+  <link rel="icon" href="images/favicon.ico" sizes="any">
+  <link rel="icon" href="images/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 
 </head>
 <body>
@@ -37,7 +37,7 @@
   <header class="header" id="header">
     <div class="header-inner">
       <a href="#home" class="logo" aria-label="Glendalough home">
-		<img src="images/logo-gold-full.png" alt="GLENDALOUGH" class="logo-image">
+        <img src="images/logo-gold-full.png" alt="GLENDALOUGH" class="logo-image">
       </a>
 
       <nav class="nav" aria-label="Main navigation">
@@ -78,7 +78,7 @@
       <div class="hero-background"></div>
       <div class="hero-overlay"></div>
       <div class="hero-content" aria-labelledby="hero-title">
-  <img src="images/apple-touch-icon.png" alt="" class="hero-symbol hero-reveal hero-reveal-1">
+        <img src="images/apple-touch-icon.png" alt="" class="hero-symbol hero-reveal hero-reveal-1">
         <p class="hero-eyebrow hero-reveal hero-reveal-1">CELTIC TRADITIONAL MUSIC</p>
         <h1 id="hero-title" class="hero-reveal hero-reveal-2">GLENDALOUGH</h1>
         <p class="hero-copy hero-reveal hero-reveal-3">Music that whispers<br>from the mist of the Celtic lands.</p>
@@ -319,16 +319,57 @@
             <h3>WHERE WE'VE BEEN</h3>
           </div>
           <div class="past-events-grid">
-            <article class="past-event reveal">
-              <p>2026</p>
-              <h4>St. Patrick's Day</h4>
-              <span>Nagoya</span>
+            <!-- TikTok埋め込みカード -->
+            <article class="past-event reveal past-event-with-video">
+              <p>2026/9/10</p>
+              <h4>K.Dハポン-空き地-「ギルド～ケルト音楽×オールドタイム～」</h4>
+              <span>3-Band Encore Session / Nagoya</span>
+              
+              <div class="tiktok-container">
+                <blockquote 
+                  class="tiktok-embed" 
+                  cite="https://www.tiktok.com/@glendalough.jp/video/7685398773727497493" 
+                  data-video-id="7685398773727497493" 
+                  style="max-width: 605px;min-width: 325px;">
+                  <section>
+                    <a target="_blank" href="https://www.tiktok.com/@glendalough.jp/video/7685398773727497493"></a>
+                  </section>
+                </blockquote>
+                <script async src="https://www.tiktok.com/embed.js"></script>
+              </div>
             </article>
+
+            <!-- Instagramリール埋め込みカード -->
+            <article class="past-event reveal past-event-with-video">
+              <p>2026/8/8</p>
+              <h4>KITTE名古屋「喜々快々な夏祭り」</h4>
+              <span>Glendalough / Nagoya</span>
+              
+              <div class="instagram-container">
+                <blockquote 
+                  class="instagram-media" 
+                  data-instgrm-permalink="https://www.instagram.com/reel/Dbzb1vHzqWn/" 
+                  data-instgrm-version="14"
+                  style="background:#FFF; border:0; margin:0; padding:0; width:100%;">
+                </blockquote>
+                <script async src="https://www.instagram.com/embed.js"></script>
+              </div>
+            </article>            
+
             <article class="past-event reveal">
-              <p>2025</p>
-              <h4>St. Patrick's Day</h4>
-              <span>Nagoya</span>
-            </article>
+              <p>2025/7/12</p>
+              <h4>Casa de la Luna「Fiesta de la Luna Julio!!」</h4>
+              <span>Glendalough / Nagoya</span>
+              <div class="instagram-container">
+                <blockquote 
+                  class="instagram-media" 
+                  data-instgrm-permalink="https://www.instagram.com/reel/DYT5gg_TQML/" 
+                  data-instgrm-version="14"
+                  style="background:#FFF; border:0; margin:0; padding:0; width:100%;">
+                </blockquote>
+                <script async src="https://www.instagram.com/embed.js"></script>
+              </div>
+            </article>            
           </div>
         </div>
 
@@ -603,7 +644,7 @@
         body.classList.remove('menu-open');
       };
 
-// メニュー外側のエリアをクリックした時にメニューを閉じる
+      // メニュー外側のエリアをクリックした時にメニューを閉じる
       document.addEventListener('click', (e) => {
         if (mobileNav.classList.contains('active') && 
             !mobileNav.contains(e.target) && 
