@@ -143,8 +143,9 @@ button {
     left: 0;
     width: 100%;
     z-index: 1000;
-    border-bottom: 1px solid transparent;
-    transition:
+	border-bottom: 1px solid transparent;
+	background: linear-gradient(to bottom, rgba(0, 0, 0, 0.65) 0%, transparent 100%);
+transition:
         background 0.35s ease,
         backdrop-filter 0.35s ease,
         border-color 0.35s ease;
@@ -176,27 +177,20 @@ button {
 
 .logo {
     display: flex;
-    flex-direction: column;
-    line-height: 1;
+	align-items: center;
     flex-shrink: 0;
 }
 
-
-.logo-main {
-    font-family: var(--display);
-    font-size: 21px;
-    letter-spacing: 0.18em;
+/* 画像ロゴの指定（PC時） */
+.logo-image,
+.logo-main img,
+.header-logo img {
+    height: 48px; /* PCでの表示高さ（大きめに設定） */
+    width: auto;
+    display: block;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)); /* ロゴの輪郭をくっきりさせる */
 }
-
-
-.logo-sub {
-    margin-top: 7px;
-    font-family: var(--display);
-    font-size: 7px;
-    letter-spacing: 0.25em;
-    color: var(--gold);
-}
-
 
 /* Desktop Navigation */
 
@@ -214,6 +208,7 @@ button {
     position: relative;
     padding: 8px 0;
     white-space: nowrap;
+	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 
 
@@ -360,10 +355,11 @@ button {
 
 .hero h1 {
     font-family: var(--display);
-    font-size: clamp(48px, 9vw, 110px);
+    font-size: clamp(32px, 6.5vw, 88px);
     font-weight: 500;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.1em;
     line-height: 1.1;
+	text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
 
@@ -1941,11 +1937,6 @@ button {
         --header-height: 75px;
     }
 
-    .hero-content h1 {
-        font-size: clamp(2.5rem, 10vw, 5rem);
-    }
-
-
     /* Container */
 
     .container {
@@ -1954,6 +1945,13 @@ button {
 
 
     /* Header */
+
+	.logo-image,
+    .logo-main img,
+    .header-logo img {
+        height: 38px !important; /* スマホ画面でハッキリ見えるサイズ */
+        width: auto !important;
+    }
 
     .header-inner {
         width: calc(100% - 40px);
@@ -2443,43 +2441,28 @@ button {
    Logo & Symbol Styles
    ========================================== */
 
-/* ヘッダーロゴ画像のサイズ調整 */
-.logo-image {
-  height: 32px; /* ヘッダーの高さに合わせて微調整してください */
-  width: auto;
-  display: block;
-	object-fit:contain;
-}
-
-/* HEROセクションのシンボルロゴ調整 */
+/* HEROセクションのシンボルロゴ（PC表示） */
 .hero-symbol {
-  width: 90px; /* 表示サイズ */
+  width: 90px;
   height: auto;
   margin: 0 auto 1.2rem;
   display: block;
   opacity: 0.9;
 }
 
-/* ③ スマホ表示時のヘッダーロゴ調整（レスポンシブ） */
-@media screen and (max-width: 900px) {
-  .logo-image {
-    height: 26px; /* スマホ画面のヘッダーに綺麗に収まる高さ */
-  }
+.hero-symbol img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* スマホ表示時のHEROシンボルサイズ調整 */
+@media screen and (max-width: 768px) {
   .hero-symbol {
-    width: 70px; /* スマホでのHEROシンボルサイズ */
+    width: 70px; /* スマホでちょうど良いサイズに縮小 */
     margin-bottom: 1rem;
   }
 }
-
-/* スマホ表示時にロゴの親要素と画像を画面内に収める設定 */
-@media (max-width: 768px) {
-  /* 親要素の幅を画面幅内に制限する */
-  .hero-symbol {
-    width: 80% !important;     /* 画面幅の80%に指定（お好みで調整可） */
-    max-width: 300px !important;/* 大きくなりすぎない上限サイズ */
-    margin: 0 auto !important; /* 中央寄せ */
-  }
-
   /* 画像自体も親要素に合わせて伸縮 */
   .hero-symbol img {
     width: 100% !important;
