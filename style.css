@@ -3159,3 +3159,33 @@ object-fit:contain;
         min-width: 250px;
     }
 }
+/* =====================================================
+   PAST EVENTS EMBED CONTAINER
+===================================================== */
+
+.past-event-with-video {
+    display: flex;
+    flex-direction: column;
+}
+
+.tiktok-container,
+.instagram-container {
+    margin-top: 15px;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.tiktok-embed {
+    max-width: 100% !important;
+    min-width: 100% !important;
+    margin: 0 !important;
+}
+
+.instagram-media {
+    max-width: 100% !important;
+    min-width: 100% !important;
+    margin: 0 !important;
+    background: #FFF;
+    border: 0;
+}
