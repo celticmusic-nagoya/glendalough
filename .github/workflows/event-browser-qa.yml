@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'events/**'
+      - 'en/**'
       - 'index.html'
       - 'style.css'
       - 'sitemap.xml'
@@ -25,7 +26,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: |
           mkdir -p /tmp/site/glendalough screenshots
-          cp -a index.html style.css events images sitemap.xml /tmp/site/glendalough/
+          cp -a index.html style.css events en images sitemap.xml /tmp/site/glendalough/
           python3 -m http.server 8765 --directory /tmp/site > /tmp/server.log 2>&1 &
           node <<'JS'
           const {chromium}=require('playwright');
@@ -37,6 +38,9 @@ jobs:
                 const page=await browser.newPage({viewport:{width,height:900}});
                 await page.goto('http://127.0.0.1:8765/glendalough/',{waitUntil:'domcontentloaded'});
                 await page.addStyleTag({content:'.reveal{opacity:1!important;transform:none!important}'});
+                assert.equal(await page.locator('#event').getAttribute('required'),null);
+                const metrics=await page.evaluate(()=>{const n=performance.getEntriesByType('navigation')[0];return {domContentLoadedMs:n.domContentLoadedEventEnd,resources:performance.getEntriesByType('resource').map(r=>({url:r.name,transferBytes:r.transferSize,durationMs:r.duration})),images:[...document.images].map(i=>({src:i.getAttribute('src'),loading:i.loading}))}});
+                require('node:fs').writeFileSync('screenshots/performance-'+width+'.json',JSON.stringify(metrics,null,2));
                 const future=page.locator('.live-future'), recent=page.locator('.live-recent');
                 assert(await future.count()===1 && await recent.count()===1);
                 assert((await future.boundingBox()).y < (await recent.boundingBox()).y);
@@ -44,6 +48,17 @@ jobs:
                 assert(await page.locator('#date').getAttribute('required')===null);
                 assert(await page.locator('#venue').getAttribute('required')===null);
                 await page.locator('#live').screenshot({path:'screenshots/live-'+width+'.png',timeout:30000});
+                assert.equal(await page.locator('link[hreflang="en"]').count(),1);
+                await page.keyboard.press('Tab');
+                await page.locator('.skip-link').focus();
+                assert(await page.locator('.skip-link').evaluate(e=>e.getBoundingClientRect().top>=0));
+                const english=await page.goto('http://127.0.0.1:8765/glendalough/en/');
+                assert.equal(english.status(),200);
+                assert.equal(await page.locator('html').getAttribute('lang'),'en');
+                assert(await page.locator('h1').isVisible());
+                assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+                assert.equal(await page.locator('link[hreflang="ja"]').count(),1);
+                await page.screenshot({path:'screenshots/english-'+width+'.png',fullPage:true});
                 for(const day of ['24','25']){
                   const url='http://127.0.0.1:8765/glendalough/events/christmas-2026-'+day+'.html';
                   const response=await page.goto(url);
