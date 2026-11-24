@@ -1,0 +1,59 @@
+name: Event browser QA
+on:
+  pull_request:
+    paths:
+      - 'events/**'
+      - 'index.html'
+      - 'style.css'
+      - 'sitemap.xml'
+      - '.github/workflows/event-browser-qa.yml'
+permissions:
+  contents: read
+concurrency:
+  group: event-browser-qa-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --package-lock=false playwright@1.51.1
+      - run: npx playwright install --with-deps chromium
+      - run: |
+          mkdir -p /tmp/site/glendalough screenshots
+          cp -a index.html style.css events images sitemap.xml /tmp/site/glendalough/
+          python3 -m http.server 8765 --directory /tmp/site > /tmp/server.log 2>&1 &
+          node <<'JS'
+          const {chromium}=require('playwright');
+          const assert=require('node:assert/strict');
+          (async()=>{
+            const browser=await chromium.launch();
+            try {
+              for(const width of [320,390,768,1440]){
+                const page=await browser.newPage({viewport:{width,height:900}});
+                for(const day of ['24','25']){
+                  const url='http://127.0.0.1:8765/glendalough/events/christmas-2026-'+day+'.html';
+                  const response=await page.goto(url);
+                  assert.equal(response.status(),200);
+                  assert(await page.locator('h1').isVisible());
+                  const schema=JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
+                  assert.equal(schema['@type'],'MusicEvent');
+                  assert(schema.startDate.includes('2026-12-'+day));
+                  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth && [...document.querySelectorAll('main h1,main dd,main a')].every(e=>e.scrollWidth<=e.clientWidth || getComputedStyle(e).display==='inline')));
+                  await page.screenshot({path:'screenshots/'+day+'-'+width+'.png',fullPage:true});
+                  assert.equal(await page.locator('a[href="../#live"]').count(),1);
+                }
+                await page.close();
+              }
+            } finally {await browser.close();}
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: event-browser-screenshots
+          path: screenshots/
