@@ -1,0 +1,24 @@
+name: Image optimization
+on:
+  pull_request:
+    paths:
+      - 'scripts/optimize_images.py'
+      - '.github/workflows/image-optimization.yml'
+permissions:
+  contents: read
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install Pillow==11.3.0
+      - run: python scripts/optimize_images.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: optimized-images
+          path: |
+            images/web/
+            image-optimization-report.json
