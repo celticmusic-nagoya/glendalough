@@ -3320,3 +3320,12 @@ object-fit:contain;
 @media(prefers-reduced-motion:reduce){
  .hero-background{animation:none;transform:none}
 }
+
+/* Mobile editorial fit and explicit keyboard focus visibility. */
+.skip-link:focus{transform:none!important;top:8px!important;visibility:visible!important;opacity:1!important;transition:none!important}
+@media(max-width:600px){
+ .hero h1{white-space:nowrap;overflow-wrap:normal;font-size:clamp(24px,8.1vw,48px);letter-spacing:.015em}
+ .logo-image{height:34px}
+ .hero-overlay{background:linear-gradient(90deg,rgba(8,13,9,.84),rgba(8,13,9,.32)),linear-gradient(0deg,rgba(8,13,9,.72),transparent 70%)}
+ .hero-scroll{bottom:36px}
+}
