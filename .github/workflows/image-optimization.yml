@@ -8,9 +8,13 @@ permissions:
   contents: read
 jobs:
   generate:
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -23,3 +27,16 @@ jobs:
           path: |
             images/web/
             image-optimization-report.json
+      - name: Persist generated assets on approved PR branch
+        if: success() && github.event.pull_request.number == 9 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'feature/web-image-optimization'
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+          branch=feature/web-image-optimization
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          test "$(git ls-remote origin refs/heads/$branch | cut -f1)" = "$EXPECTED"
+          git add -- images/web/ image-optimization-report.json
+          if git diff --cached --quiet; then exit 0; fi
+          git -c user.name=github-actions -c user.email=41898282+github-actions[bot]@users.noreply.github.com commit -m "Persist verified responsive WebP assets"
+          git push origin HEAD:refs/heads/$branch
