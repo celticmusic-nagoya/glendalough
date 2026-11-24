@@ -54,7 +54,7 @@ jobs:
                 await baseline.evaluate(()=>document.fonts.ready);
                 await baseline.screenshot({path:'screenshots/baseline-hero-'+width+'.png'});
                 await baseline.close();
-                assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Home horizontal overflow at '+width);
+                const overflow=await page.evaluate(()=>({viewport:innerWidth,document:document.documentElement.scrollWidth,offenders:[...document.querySelectorAll('body *')].map(e=>({tag:e.tagName,cls:String(e.className),right:e.getBoundingClientRect().right,left:e.getBoundingClientRect().left,width:e.scrollWidth})).filter(e=>e.right>innerWidth+1||e.left< -1).slice(0,60)})); require('node:fs').writeFileSync('screenshots/overflow-'+width+'.json',JSON.stringify(overflow,null,2)); console.log('OVERFLOW',JSON.stringify(overflow)); assert(overflow.document<=width,'Home horizontal overflow at '+width);
                 assert.equal(await page.locator('#event').getAttribute('required'),null);
                 const optimized=await page.evaluate(async()=>{const imgs=[...document.querySelectorAll('img[srcset*="images/web/"]')];await Promise.all(imgs.map(async i=>{i.loading='eager';await i.decode()}));return imgs.map(i=>({src:i.currentSrc,width:i.naturalWidth}))});
                 assert.equal(optimized.length,4);
