@@ -1,0 +1,197 @@
+[
+  {
+    "source": "hero2.jpg",
+    "source_sha256": "121527d4a5932a976a07534012157afed08a921d64083e850577e644a56303bd",
+    "source_bytes": 2604975,
+    "output": "images/web/hero2-640.webp",
+    "bytes": 46312,
+    "size": [
+      640,
+      427
+    ],
+    "quality": 85,
+    "sha256": "4c90f57a8357fd8bb3d78f2a46ae6365d84bad9ded1838bfc70022c3ce5e9ba8"
+  },
+  {
+    "source": "hero2.jpg",
+    "source_sha256": "121527d4a5932a976a07534012157afed08a921d64083e850577e644a56303bd",
+    "source_bytes": 2604975,
+    "output": "images/web/hero2-1280.webp",
+    "bytes": 160284,
+    "size": [
+      1280,
+      853
+    ],
+    "quality": 85,
+    "sha256": "e23dca96fbac3243cb38bbffe79a65faae43288d53cf575574dbd755c8ce0f82"
+  },
+  {
+    "source": "hero2.jpg",
+    "source_sha256": "121527d4a5932a976a07534012157afed08a921d64083e850577e644a56303bd",
+    "source_bytes": 2604975,
+    "output": "images/web/hero2-1920.webp",
+    "bytes": 224420,
+    "size": [
+      1536,
+      1024
+    ],
+    "quality": 85,
+    "sha256": "a8cd10d30993796eb57e8010e9265983e715b5eb19355ca49ca3371025fa9e47"
+  },
+  {
+    "source": "hero.jpg",
+    "source_sha256": "a01f180999e4a028dce708ecd518145018509ad1f781e6735ca7681727629862",
+    "source_bytes": 987107,
+    "output": "images/web/hero-640.webp",
+    "bytes": 141630,
+    "size": [
+      640,
+      562
+    ],
+    "quality": 85,
+    "sha256": "797796f5e75da453c737e960198497d0a9252e5555f0947dcc359097bc81ed07"
+  },
+  {
+    "source": "hero.jpg",
+    "source_sha256": "a01f180999e4a028dce708ecd518145018509ad1f781e6735ca7681727629862",
+    "source_bytes": 987107,
+    "output": "images/web/hero-1280.webp",
+    "bytes": 213144,
+    "size": [
+      960,
+      843
+    ],
+    "quality": 70,
+    "sha256": "abce37d9168432cb3845ed6ed8affe48b9b54f9a67c6f8432f3091de90157adc"
+  },
+  {
+    "source": "hero.jpg",
+    "source_sha256": "a01f180999e4a028dce708ecd518145018509ad1f781e6735ca7681727629862",
+    "source_bytes": 987107,
+    "output": "images/web/hero-1920.webp",
+    "bytes": 213766,
+    "size": [
+      960,
+      843
+    ],
+    "quality": 70,
+    "sha256": "81f48214a0edf8943677b73bffe5577470333a0005e3917369055f0f72c5ad36"
+  },
+  {
+    "source": "music-jigs.jpg",
+    "source_sha256": "ced0219512cbef5f54769c886e014cb7822f27c46d513ba31a17b5cbcdee1d64",
+    "source_bytes": 3674424,
+    "output": "images/web/music-jigs-640.webp",
+    "bytes": 116370,
+    "size": [
+      640,
+      427
+    ],
+    "quality": 85,
+    "sha256": "a46079dd2435d9d4ec6d9ae26e08ccc546544607d3b33f4b25f8e0440b8720b9"
+  },
+  {
+    "source": "music-jigs.jpg",
+    "source_sha256": "ced0219512cbef5f54769c886e014cb7822f27c46d513ba31a17b5cbcdee1d64",
+    "source_bytes": 3674424,
+    "output": "images/web/music-jigs-1280.webp",
+    "bytes": 376228,
+    "size": [
+      1280,
+      853
+    ],
+    "quality": 85,
+    "sha256": "586beb1bf86b58502b42e5d221507f2c57ecd9a42cd90c8cd641452dd25fcae4"
+  },
+  {
+    "source": "music-jigs.jpg",
+    "source_sha256": "ced0219512cbef5f54769c886e014cb7822f27c46d513ba31a17b5cbcdee1d64",
+    "source_bytes": 3674424,
+    "output": "images/web/music-jigs-1920.webp",
+    "bytes": 507438,
+    "size": [
+      1536,
+      1024
+    ],
+    "quality": 85,
+    "sha256": "707903e16696ccd1a17133544432e35a9daf3db1181b250bf637c8a254357d8f"
+  },
+  {
+    "source": "music-airs.jpg",
+    "source_sha256": "5630def7fe51c71e66d29cf52fa8574c8453aa28b00ffa979fd38b170fb96e27",
+    "source_bytes": 3557191,
+    "output": "images/web/music-airs-640.webp",
+    "bytes": 106386,
+    "size": [
+      640,
+      427
+    ],
+    "quality": 85,
+    "sha256": "1db313bbcc6cad76511054a787f5de89a7602b41d345410028f362cd133961f6"
+  },
+  {
+    "source": "music-airs.jpg",
+    "source_sha256": "5630def7fe51c71e66d29cf52fa8574c8453aa28b00ffa979fd38b170fb96e27",
+    "source_bytes": 3557191,
+    "output": "images/web/music-airs-1280.webp",
+    "bytes": 348214,
+    "size": [
+      1280,
+      853
+    ],
+    "quality": 85,
+    "sha256": "94f9648eda51dbbb145e7c33a5d8ded15e52a28297d257b77232fcccaf8b8cf8"
+  },
+  {
+    "source": "music-airs.jpg",
+    "source_sha256": "5630def7fe51c71e66d29cf52fa8574c8453aa28b00ffa979fd38b170fb96e27",
+    "source_bytes": 3557191,
+    "output": "images/web/music-airs-1920.webp",
+    "bytes": 462690,
+    "size": [
+      1536,
+      1024
+    ],
+    "quality": 85,
+    "sha256": "124d98ca9a44c3906febbf9775242dc9750d65d83728ae6a5adb0ed2b9122f4b"
+  },
+  {
+    "source": "music-reels.jpg",
+    "source_sha256": "9b9ffe1a7a2d309cb9b46ef2db84743444d3bc20a4b645201a679cf1b28cc097",
+    "source_bytes": 3362855,
+    "output": "images/web/music-reels-640.webp",
+    "bytes": 101554,
+    "size": [
+      640,
+      427
+    ],
+    "quality": 85,
+    "sha256": "e38f95026d2ff0b906a29c1981dc574c397364c9cc444ecd472b9fd9c754c50b"
+  },
+  {
+    "source": "music-reels.jpg",
+    "source_sha256": "9b9ffe1a7a2d309cb9b46ef2db84743444d3bc20a4b645201a679cf1b28cc097",
+    "source_bytes": 3362855,
+    "output": "images/web/music-reels-1280.webp",
+    "bytes": 327462,
+    "size": [
+      1280,
+      853
+    ],
+    "quality": 85,
+    "sha256": "744bc4f20044de3511f76b2ec78eafd921877e92f26449d0be5b25435e7ee47f"
+  },
+  {
+    "source": "music-reels.jpg",
+    "source_sha256": "9b9ffe1a7a2d309cb9b46ef2db84743444d3bc20a4b645201a679cf1b28cc097",
+    "source_bytes": 3362855,
+    "output": "images/web/music-reels-1920.webp",
+    "bytes": 432368,
+    "size": [
+      1536,
+      1024
+    ],
+    "quality": 85,
+    "sha256": "97997487c02530b91c70164c892170a9cf030776d810aebb7849111e7548850f"
+  }
+]
