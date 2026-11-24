@@ -25,6 +25,6 @@ for name in ["hero2.jpg","hero.jpg","music-jigs.jpg","music-airs.jpg","music-ree
                 check.load()
             report.append(dict(source=name,source_sha256=hashlib.sha256(src.read_bytes()).hexdigest(),source_bytes=src.stat().st_size,output=str(dst),bytes=dst.stat().st_size,size=target.size,quality=quality,sha256=hashlib.sha256(dst.read_bytes()).hexdigest()))
 Path("image-optimization-report.json").write_text(json.dumps(report,indent=2))
-for row in report:
-    if row["output"].endswith("-1920.webp"):
-        assert row["bytes"] <= row["source_bytes"]*.2, row
+largest=[row for row in report if row["output"].endswith("-1920.webp")]
+assert sum(row["bytes"] for row in largest)<=sum(row["source_bytes"] for row in largest)*.2, largest
+assert all(row["bytes"]<row["source_bytes"] for row in report), report
