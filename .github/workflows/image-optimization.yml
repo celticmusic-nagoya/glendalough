@@ -20,10 +20,32 @@ jobs:
       - run: python scripts/optimize_images.py
       - run: git diff --exit-code -- images/web/ image-optimization-report.json
       - run: test -z "$(git ls-files --others --exclude-standard images/web/ image-optimization-report.json)"
+      - name: Compare original and optimized pixels
+        run: |
+          python - <<'PY'
+          from PIL import Image, ImageOps, ImageDraw
+          from pathlib import Path
+          import json
+          rows=json.loads(Path('image-optimization-report.json').read_text())
+          out=Path('comparison')
+          out.mkdir(exist_ok=True)
+          for r in rows:
+              if not r['output'].endswith('-1920.webp'): continue
+              with Image.open(Path('images')/r['source']) as raw:
+                  a=ImageOps.exif_transpose(raw).convert('RGB').resize(tuple(r['size']),Image.Resampling.LANCZOS)
+              with Image.open(r['output']) as raw:
+                  b=raw.convert('RGB')
+              w,h=a.size
+              sheet=Image.new('RGB',(2*w,h+40),'white')
+              sheet.paste(a,(0,40));sheet.paste(b,(w,40))
+              d=ImageDraw.Draw(sheet);d.text((10,12),'Original resized to delivery dimensions',fill='black');d.text((w+10,12),'WebP delivery candidate',fill='black')
+              sheet.save(out/(Path(r['source']).stem+'.png'))
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: optimized-images
           path: |
+            comparison/
             images/web/
             image-optimization-report.json
