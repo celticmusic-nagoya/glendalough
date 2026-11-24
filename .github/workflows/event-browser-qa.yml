@@ -39,6 +39,10 @@ jobs:
                 await page.goto('http://127.0.0.1:8765/glendalough/',{waitUntil:'domcontentloaded'});
                 await page.addStyleTag({content:'.reveal{opacity:1!important;transform:none!important}'});
                 assert.equal(await page.locator('#event').getAttribute('required'),null);
+                const optimized=await page.evaluate(async()=>{const imgs=[...document.querySelectorAll('img[srcset*="images/web/"]')];await Promise.all(imgs.map(async i=>{i.loading='eager';await i.decode()}));return imgs.map(i=>({src:i.currentSrc,width:i.naturalWidth}))});
+                assert.equal(optimized.length,4);
+                assert(optimized.every(i=>i.width>0 && i.src.endsWith('.webp')));
+                await page.screenshot({path:'screenshots/home-'+width+'.png',fullPage:true});
                 const metrics=await page.evaluate(()=>{const n=performance.getEntriesByType('navigation')[0];return {domContentLoadedMs:n.domContentLoadedEventEnd,resources:performance.getEntriesByType('resource').map(r=>({url:r.name,transferBytes:r.transferSize,durationMs:r.duration})),images:[...document.images].map(i=>({src:i.getAttribute('src'),loading:i.loading}))}});
                 require('node:fs').writeFileSync('screenshots/performance-'+width+'.json',JSON.stringify(metrics,null,2));
                 const future=page.locator('.live-future'), recent=page.locator('.live-recent');
@@ -58,6 +62,7 @@ jobs:
                 assert(await page.locator('h1').isVisible());
                 assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
                 assert.equal(await page.locator('link[hreflang="ja"]').count(),1);
+                assert(await page.locator('img[srcset]').evaluate(async i=>{await i.decode();return i.naturalWidth>0 && i.currentSrc.endsWith('.webp')}));
                 await page.screenshot({path:'screenshots/english-'+width+'.png',fullPage:true});
                 for(const day of ['24','25']){
                   const url='http://127.0.0.1:8765/glendalough/events/christmas-2026-'+day+'.html';
