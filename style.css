@@ -3189,3 +3189,13 @@ object-fit:contain;
     background: #FFF;
     border: 0;
 }
+/* Compact recent performance, subordinate to upcoming concerts. */
+.live-recent { margin-top: 64px; }
+.live-recent .live-block-heading { margin-bottom: 20px; }
+.live-recent .live-block-heading h3 { font-size: clamp(1.4rem, 3vw, 2rem); }
+.live-recent .live-event { grid-template-columns: minmax(0, 180px) minmax(0, 1fr); max-width: 760px; }
+.live-recent .live-event-image { min-height: 0; aspect-ratio: auto; }
+.live-recent .live-event-image img { width: 100%; height: auto; object-fit: contain; }
+.live-recent .live-event-info { padding: 20px; min-width: 0; }
+.live-recent .live-event-info h4 { font-size: clamp(1rem, 2vw, 1.3rem); overflow-wrap: anywhere; }
+@media (max-width: 600px) { .live-recent .live-event { grid-template-columns: minmax(0, 90px) minmax(0, 1fr); } .live-recent .live-event-info { padding: 12px; } }

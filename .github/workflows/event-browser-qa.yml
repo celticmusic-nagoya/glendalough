@@ -35,6 +35,15 @@ jobs:
             try {
               for(const width of [320,390,768,1440]){
                 const page=await browser.newPage({viewport:{width,height:900}});
+                await page.goto('http://127.0.0.1:8765/glendalough/',{waitUntil:'domcontentloaded'});
+                await page.addStyleTag({content:'.reveal{opacity:1!important;transform:none!important}'});
+                const future=page.locator('.live-future'), recent=page.locator('.live-recent');
+                assert(await future.count()===1 && await recent.count()===1);
+                assert((await future.boundingBox()).y < (await recent.boundingBox()).y);
+                assert((await recent.locator('.live-event-image').boundingBox()).width <= 180);
+                assert(await page.locator('#date').getAttribute('required')===null);
+                assert(await page.locator('#venue').getAttribute('required')===null);
+                await page.locator('#live').screenshot({path:'screenshots/live-'+width+'.png',timeout:30000});
                 for(const day of ['24','25']){
                   const url='http://127.0.0.1:8765/glendalough/events/christmas-2026-'+day+'.html';
                   const response=await page.goto(url);
