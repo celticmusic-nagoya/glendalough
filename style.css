@@ -1197,7 +1197,7 @@ button {
 }
 
 
-/* YouTubeƒVƒ‡[ƒg“®‰æ‚ğ3‚Â‰¡•À‚Ñ‚É‚·‚éİ’è */
+/* YouTubeã‚·ãƒ§ãƒ¼ãƒˆå‹•ç”»ã‚’3ã¤æ¨ªä¸¦ã³ã«ã™ã‚‹è¨­å®š */
 .music-video-content {
     display: flex;
     justify-content: center;
@@ -2630,8 +2630,8 @@ button {
     }
 
 	.live-event-image img{
-	width:100%
-	height:100%
+	width:100%;
+	height:100%;
 	object-fit: contain;
 }
 
