@@ -19,6 +19,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: baseline
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -27,6 +33,8 @@ jobs:
       - run: |
           mkdir -p /tmp/site/glendalough screenshots
           cp -a index.html style.css events en images sitemap.xml /tmp/site/glendalough/
+          mkdir -p /tmp/site/baseline
+          cp -a baseline/index.html baseline/style.css baseline/events baseline/en baseline/images baseline/sitemap.xml /tmp/site/baseline/
           python3 -m http.server 8765 --directory /tmp/site > /tmp/server.log 2>&1 &
           node <<'JS'
           const {chromium}=require('playwright');
@@ -38,6 +46,15 @@ jobs:
                 const page=await browser.newPage({viewport:{width,height:900}});
                 await page.goto('http://127.0.0.1:8765/glendalough/',{waitUntil:'domcontentloaded'});
                 await page.addStyleTag({content:'.reveal{opacity:1!important;transform:none!important}'});
+                await page.emulateMedia({reducedMotion:'reduce'});
+                await page.evaluate(()=>document.fonts.ready);
+                await page.screenshot({path:'screenshots/candidate-hero-'+width+'.png'});
+                const baseline=await browser.newPage({viewport:{width,height:900},reducedMotion:'reduce'});
+                await baseline.goto('http://127.0.0.1:8765/baseline/',{waitUntil:'domcontentloaded'});
+                await baseline.evaluate(()=>document.fonts.ready);
+                await baseline.screenshot({path:'screenshots/baseline-hero-'+width+'.png'});
+                await baseline.close();
+                assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Home horizontal overflow at '+width);
                 assert.equal(await page.locator('#event').getAttribute('required'),null);
                 const optimized=await page.evaluate(async()=>{const imgs=[...document.querySelectorAll('img[srcset*="images/web/"]')];await Promise.all(imgs.map(async i=>{i.loading='eager';await i.decode()}));return imgs.map(i=>({src:i.currentSrc,width:i.naturalWidth}))});
                 assert.equal(optimized.length,4);
