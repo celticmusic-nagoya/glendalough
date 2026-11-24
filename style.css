@@ -3329,3 +3329,6 @@ object-fit:contain;
  .hero-overlay{background:linear-gradient(90deg,rgba(8,13,9,.84),rgba(8,13,9,.32)),linear-gradient(0deg,rgba(8,13,9,.72),transparent 70%)}
  .hero-scroll{bottom:36px}
 }
+
+/* Measured at 768px: caption right edge 772px. Keep within figure at tablet widths. */
+@media (min-width:601px) and (max-width:900px){.about-image .image-caption{right:0;max-width:100%;box-sizing:border-box}}
