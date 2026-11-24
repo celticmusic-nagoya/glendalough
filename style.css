@@ -3332,3 +3332,21 @@ object-fit:contain;
 
 /* Measured at 768px: caption right edge 772px. Keep within figure at tablet widths. */
 @media (min-width:601px) and (max-width:900px){.about-image .image-caption{right:0;max-width:100%;box-sizing:border-box}}
+
+/* Editorial readability and existing performance video presentation. */
+.music-video-heading h3{line-height:1.12;text-wrap:balance}
+.youtube-short{min-width:0;max-width:100%;overflow:hidden;border-radius:4px}
+.youtube-short iframe{display:block;width:100%;border:0}
+.music-youtube-link{min-height:44px}
+@media(max-width:600px){
+ .hero-copy{font-size:14px;line-height:1.8;letter-spacing:.035em}
+ .hero-eyebrow{font-size:9px;letter-spacing:.2em}
+ .hero .button-primary{font-size:14px;min-height:48px}
+ .music-video-content{gap:24px}
+ .music-video-heading h3{font-size:clamp(28px,8vw,44px)}
+}
+@media(min-width:601px) and (max-width:900px){
+ .hero h1{font-size:clamp(42px,7.2vw,66px);letter-spacing:.045em}
+ .section-heading{gap:28px;margin-bottom:56px}
+ .music-section-heading h2{font-size:clamp(56px,9vw,82px)}
+}
