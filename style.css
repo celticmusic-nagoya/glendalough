@@ -3412,3 +3412,12 @@ main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
 .gallery-film:focus-visible{outline:2px solid #d6b779;outline-offset:-3px}
 .gallery-grid .gallery-item:has(.gallery-film) figcaption{font-size:10px;letter-spacing:.02em}
 @media(max-width:600px){.gallery-grid .gallery-item:has(.gallery-film) figcaption{font-size:9px}}
+
+/* Pair portrait-oriented documentary thumbnails beside the ensemble image. */
+@media(min-width:901px){
+ .gallery-grid{grid-auto-rows:clamp(220px,24vw,340px)}
+ .gallery-grid .gallery-item:nth-child(1){grid-column:span 6;grid-row:span 1}
+ .gallery-grid .gallery-item:nth-child(2),.gallery-grid .gallery-item:nth-child(3){grid-column:span 3;grid-row:span 1}
+}
+.gallery-grid .gallery-item:has(.gallery-film) figcaption{min-height:36px;box-sizing:border-box;display:flex;align-items:center;line-height:1.45}
+@media(max-width:600px){.gallery-grid .gallery-item:has(.gallery-film) figcaption{padding:6px 8px;font-size:10px;min-height:36px}}
