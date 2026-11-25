@@ -29,6 +29,39 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify editorial photo provenance and source links
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          from html.parser import HTMLParser
+          class Gallery(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.inside=False
+                  self.images=[]
+                  self.links=[]
+              def handle_starttag(self, tag, attrs):
+                  a=dict(attrs)
+                  if tag=='section':
+                      self.inside=a.get('id')=='gallery'
+                  if self.inside and tag=='img': self.images.append(a.get('src'))
+                  if self.inside and tag=='a': self.links.append(a.get('href'))
+              def handle_endtag(self, tag):
+                  if tag=='section': self.inside=False
+          gallery=Gallery()
+          gallery.feed(Path('index.html').read_text())
+          records=json.loads(Path('images/editorial/provenance.json').read_text())
+          assert len(records)==3
+          assert len({x['path'] for x in records})==3
+          for r in records:
+              p=Path(r['path'])
+              assert p.parent==Path('images/editorial')
+              assert hashlib.sha256(p.read_bytes()).hexdigest()==r['sha256'],p
+              assert r['source_type']=='official_video_thumbnail_not_direct_frame'
+              assert r['path'] in gallery.images and r['source_url'] in gallery.links,p
+          print('Editorial source and image SHA verification PASS: 3/3')
+          PY
       - run: npm install --no-save --package-lock=false playwright@1.51.1
       - run: npx playwright install --with-deps chromium
       - run: |
