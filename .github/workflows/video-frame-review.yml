@@ -1,0 +1,41 @@
+name: Official video frame extraction
+on:
+  pull_request:
+    paths:
+      - 'scripts/extract_video_frames.py'
+      - '.github/workflows/video-frame-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: video-frame-review-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  frames:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install signed Ubuntu FFmpeg package and pinned downloader
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version
+          ffprobe -version
+          python -m pip install 'yt-dlp==2026.11.23' 'Pillow==11.2.1'
+          yt-dlp --version
+      - name: Verify extraction and collect review-only video frames
+        run: python scripts/extract_video_frames.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: official-video-frame-review
+          path: video-review/
+          if-no-files-found: warn
+          retention-days: 7
