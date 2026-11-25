@@ -3407,8 +3407,8 @@ main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
 @media(max-width:600px){.gallery-grid .gallery-item:first-child{aspect-ratio:4/3}}
 
 /* Documentary thumbnails: retain the complete reviewed crop rather than cut musicians. */
-.gallery-film{display:block;width:100%;height:100%;color:inherit}
-.gallery-grid .gallery-film img{object-fit:contain;background:#101510}
+.gallery-film{display:block;color:inherit;text-decoration:underline;text-underline-offset:3px}
+.gallery-grid .gallery-item:has(.gallery-film) img{object-fit:contain;background:#101510}
 .gallery-film:focus-visible{outline:2px solid #d6b779;outline-offset:-3px}
-.gallery-grid .gallery-film figcaption{font-size:10px;letter-spacing:.02em}
-@media(max-width:600px){.gallery-grid .gallery-film figcaption{font-size:9px}}
+.gallery-grid .gallery-item:has(.gallery-film) figcaption{font-size:10px;letter-spacing:.02em}
+@media(max-width:600px){.gallery-grid .gallery-item:has(.gallery-film) figcaption{font-size:9px}}
