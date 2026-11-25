@@ -3394,3 +3394,10 @@ object-fit:contain;
 .logo-image{height:46px;width:auto;object-fit:contain}
 @media(max-width:900px){.logo-image{height:40px;max-width:calc(100vw - 104px)}}
 @media(max-width:600px){.logo-image{height:38px}}
+
+/* Keep keyboard-only navigation hidden until focus, including full-page captures. */
+.skip-link:not(:focus){opacity:0;pointer-events:none;clip-path:inset(50%)}
+.skip-link:focus{clip-path:none;pointer-events:auto}
+/* Apply the fixed-header offset to every navigable section. */
+main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
+@media(max-width:600px){main section[id]{scroll-margin-top:96px}}
