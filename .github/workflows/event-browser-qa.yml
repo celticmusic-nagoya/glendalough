@@ -7,8 +7,6 @@ on:
       - 'index.html'
       - 'style.css'
       - 'images/**'
-      - 'glendalough-site-photos.zip'
-      - 'scripts/register_owner_photos.py'
       - 'sitemap.xml'
       - '.github/workflows/event-browser-qa.yml'
 permissions:
@@ -31,12 +29,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Import selected owner images into QA workspace if supplied
-        if: hashFiles('glendalough-site-photos.zip') != ''
-        run: |
-          python3 -m venv /tmp/photo-import
-          /tmp/photo-import/bin/pip install Pillow==11.2.1
-          /tmp/photo-import/bin/python scripts/register_owner_photos.py
       - name: Verify editorial photo provenance and source links
         run: |
           python3 - <<'PY'
@@ -134,8 +126,8 @@ jobs:
                   const bg=getComputedStyle(document.querySelector('.performance-background')).backgroundImage;
                   const url=bg.match(/url\(["']?(.*?)["']?\)/)?.[1];
                   const image=new Image(); image.src=url||''; await image.decode();
-                  const ownerAllowed=['images/web/hero-1280.webp','images/editorial/night-city-live.webp','images/editorial/indoor-live-089s.webp','images/editorial/street-performance.webp','images/image.jpg','images/live-20260910.jpg'];
-                  return {galleryMatch:[allowed,ownerAllowed].some(x=>JSON.stringify(gallery)===JSON.stringify(x)),background:bg,backgroundWidth:image.naturalWidth,genreLabels:[...document.querySelectorAll('.music-art-label')].map(e=>({text:e.textContent,visible:e.getBoundingClientRect().height>0}))};
+                  const ownerAllowed=['images/web/hero-1280.webp','images/editorial/night-city-live.webp','images/editorial/street-performance.webp','images/editorial/indoor-live-089s.webp','images/image.jpg','images/live-20260910.jpg'];
+                  return {galleryMatch:JSON.stringify(gallery)===JSON.stringify(ownerAllowed),background:bg,backgroundWidth:image.naturalWidth,genreLabels:[...document.querySelectorAll('.music-art-label')].map(e=>({text:e.textContent,visible:e.getBoundingClientRect().height>0}))};
                 });
                 assert(documentary.galleryMatch,'Unexpected gallery source');
                 assert(documentary.background.includes('/images/image.jpg')&&documentary.backgroundWidth>0,'Performance background unavailable');
@@ -188,49 +180,3 @@ jobs:
         with:
           name: event-browser-screenshots
           path: screenshots/
-
-  register-owner-photos:
-    needs: browser
-    if: github.event.pull_request.number == 10 && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'design/premium-editorial-v1'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-      - name: Check for exact owner archive
-        id: archive
-        run: |
-          if test -f glendalough-site-photos.zip; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; fi
-      - name: Reproduce tested gallery change
-        if: steps.archive.outputs.present == 'true'
-        run: |
-          python3 -m venv /tmp/photo-import
-          /tmp/photo-import/bin/pip install Pillow==11.2.1
-          /tmp/photo-import/bin/python scripts/register_owner_photos.py
-      - name: Commit only verified gallery files on candidate branch
-        if: steps.archive.outputs.present == 'true'
-        env:
-          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -euo pipefail
-          actual="$(git rev-parse HEAD)"
-          echo "Expected HEAD: $EXPECTED_HEAD; checked out: $actual"
-          test "$actual" = "$EXPECTED_HEAD" || { echo "::error::Checkout HEAD mismatch"; exit 1; }
-          remote="$(git ls-remote --refs origin refs/heads/design/premium-editorial-v1 | awk '{print $1}')"
-          echo "Remote HEAD: $remote"
-          test "$remote" = "$EXPECTED_HEAD" || { echo "::error::Remote HEAD changed; do not push"; exit 1; }
-          git status --short
-          git add -A -- index.html style.css images/editorial/indoor-live-089s.webp images/editorial/night-city-live.webp images/editorial/street-performance.webp images/editorial/provenance.json images/editorial/thumbnail-provenance-archive.json glendalough-site-photos.zip
-          git diff --cached --no-renames --name-status
-          python3 - <<'PY'
-          import subprocess
-          expected=set("index.html style.css images/editorial/indoor-live-089s.webp images/editorial/night-city-live.webp images/editorial/street-performance.webp images/editorial/provenance.json images/editorial/thumbnail-provenance-archive.json glendalough-site-photos.zip".split())
-          # Null-delimited parsing avoids line count and rename detection ambiguity.
-          actual=set(subprocess.check_output(["git","diff","--cached","--no-renames","--name-only","-z"]).decode().split(chr(0)))-{""}
-          assert actual==expected, {"missing":sorted(expected-actual),"unexpected":sorted(actual-expected)}
-          PY
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Integrate exact owner-approved documentary photo candidates after browser QA'
-          git push origin HEAD:refs/heads/design/premium-editorial-v1
