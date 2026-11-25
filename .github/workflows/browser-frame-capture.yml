@@ -1,10 +1,5 @@
 name: Method C public video browser capture
 on:
-  pull_request:
-    paths:
-      - 'scripts/capture_browser_frames.cjs'
-      - 'scripts/select_browser_frames.py'
-      - '.github/workflows/browser-frame-capture.yml'
   workflow_dispatch:
 permissions:
   contents: read
