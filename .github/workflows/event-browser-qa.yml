@@ -111,6 +111,25 @@ jobs:
                 await page.screenshot({path:'screenshots/gallery-anchor-'+width+'.png'});
 
                 await page.locator('#gallery').screenshot({path:'screenshots/gallery-'+width+'.png'});
+                // Documentary-first contract: performance background and gallery photo allowlist.
+                assert.equal(await page.locator('#works .work-item').count(),3);
+                assert.equal(await page.locator('#works img').count(),0);
+                assert.equal(await page.locator('#music .music-art-label').count(),6);
+                const documentary=await page.evaluate(async()=>{
+                  const allowed=['images/web/hero-1280.webp','images/editorial/night-session.jpg','images/editorial/indoor-session.jpg','images/editorial/street-live.webp','images/image.jpg','images/live-20260910.jpg'];
+                  const gallery=[...document.querySelectorAll('#gallery img')].map(e=>e.getAttribute('src'));
+                  const bg=getComputedStyle(document.querySelector('.performance-background')).backgroundImage;
+                  const url=bg.match(/url\(["']?(.*?)["']?\)/)?.[1];
+                  const image=new Image(); image.src=url||''; await image.decode();
+                  return {galleryMatch:JSON.stringify(gallery)===JSON.stringify(allowed),background:bg,backgroundWidth:image.naturalWidth,genreLabels:[...document.querySelectorAll('.music-art-label')].map(e=>({text:e.textContent,visible:e.getBoundingClientRect().height>0}))};
+                });
+                assert(documentary.galleryMatch,'Unexpected gallery source');
+                assert(documentary.background.includes('/images/image.jpg')&&documentary.backgroundWidth>0,'Performance background unavailable');
+                assert(documentary.genreLabels.every(x=>x.visible&&x.text==='音楽イメージ'));
+                require('node:fs').writeFileSync('screenshots/documentary-'+width+'.json',JSON.stringify(documentary,null,2));
+                await page.locator('#performance').screenshot({path:'screenshots/performance-section-'+width+'.png'});
+                await page.locator('#works').screenshot({path:'screenshots/works-'+width+'.png'});
+
                 await page.screenshot({path:'screenshots/home-'+width+'.png',fullPage:true});
                 const metrics=await page.evaluate(()=>{const n=performance.getEntriesByType('navigation')[0];return {domContentLoadedMs:n.domContentLoadedEventEnd,resources:performance.getEntriesByType('resource').map(r=>({url:r.name,transferBytes:r.transferSize,durationMs:r.duration})),images:[...document.images].map(i=>({src:i.getAttribute('src'),loading:i.loading}))}});
                 require('node:fs').writeFileSync('screenshots/performance-'+width+'.json',JSON.stringify(metrics,null,2));
