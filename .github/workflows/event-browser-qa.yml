@@ -6,6 +6,7 @@ on:
       - 'en/**'
       - 'index.html'
       - 'style.css'
+      - 'images/**'
       - 'sitemap.xml'
       - '.github/workflows/event-browser-qa.yml'
 permissions:
@@ -64,6 +65,12 @@ jobs:
                 const gallery=await page.evaluate(async()=>{const imgs=[...document.querySelectorAll('#gallery img')];return Promise.all(imgs.map(async i=>{i.loading='eager';try{await i.decode()}catch{}return {src:i.getAttribute('src'),width:i.naturalWidth}}))});
                 assert.equal(gallery.length,6); require('node:fs').writeFileSync('screenshots/gallery-decode-'+width+'.json',JSON.stringify(gallery,null,2)); assert(gallery.every(i=>i.width>0),JSON.stringify(gallery));
                 await page.evaluate(async()=>{for(const i of document.images)i.loading='eager';await Promise.allSettled([...document.images].map(i=>i.decode()));});
+                const visual=await page.evaluate(()=>({logo:[...document.querySelectorAll('.header .logo-image')].map(e=>({loaded:e.naturalWidth>0,height:e.getBoundingClientRect().height,width:e.getBoundingClientRect().width})),captions:[...document.querySelectorAll('#gallery figcaption')].map(e=>({text:e.textContent,visible:e.getBoundingClientRect().height>0,fit:e.scrollWidth<=e.clientWidth&&e.scrollHeight<=e.clientHeight})),brokenLocal:[...document.images].filter(i=>new URL(i.src).origin===location.origin&&!i.naturalWidth).map(i=>i.src)}));
+                require('node:fs').writeFileSync('screenshots/visual-contract-'+width+'.json',JSON.stringify(visual,null,2));
+                assert(visual.logo.length>0 && visual.logo.every(i=>i.loaded&&i.height>=32&&i.width>0),'Logo visibility');
+                assert.equal(visual.captions.length,6);
+                assert(visual.captions.every(i=>i.visible&&i.fit),'Gallery caption clipping');
+                assert.equal(visual.brokenLocal.length,0,JSON.stringify(visual.brokenLocal));
                 await page.locator('#gallery').scrollIntoViewIfNeeded();
                 await page.locator('#gallery').screenshot({path:'screenshots/gallery-'+width+'.png'});
                 await page.screenshot({path:'screenshots/home-'+width+'.png',fullPage:true});
