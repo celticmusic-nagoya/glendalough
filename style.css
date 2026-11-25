@@ -3440,3 +3440,6 @@ main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
  .performance-content h2{font-size:clamp(30px,9vw,42px);line-height:1.15;letter-spacing:.035em}
  .performance-content .button{min-height:44px}
 }
+
+/* Preserve complete documentary compositions. */
+.gallery-grid .gallery-item:nth-child(2) img,.gallery-grid .gallery-item:nth-child(3) img,.gallery-grid .gallery-item:nth-child(4) img{object-fit:contain;background:#101510}
