@@ -7,6 +7,8 @@ on:
       - 'index.html'
       - 'style.css'
       - 'images/**'
+      - 'glendalough-site-photos.zip'
+      - 'scripts/register_owner_photos.py'
       - 'sitemap.xml'
       - '.github/workflows/event-browser-qa.yml'
 permissions:
@@ -29,6 +31,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Import selected owner images into QA workspace if supplied
+        if: hashFiles('glendalough-site-photos.zip') != ''
+        run: |
+          python3 -m venv /tmp/photo-import
+          /tmp/photo-import/bin/pip install Pillow==11.2.1
+          /tmp/photo-import/bin/python scripts/register_owner_photos.py
       - name: Verify editorial photo provenance and source links
         run: |
           python3 - <<'PY'
@@ -58,8 +66,13 @@ jobs:
               p=Path(r['path'])
               assert p.parent==Path('images/editorial')
               assert hashlib.sha256(p.read_bytes()).hexdigest()==r['sha256'],p
-              assert r['source_type']=='official_video_thumbnail_not_direct_frame'
-              assert r['path'] in gallery.images and r['source_url'] in gallery.links,p
+              assert r['path'] in gallery.images,p
+              if r['source_type']=='official_video_thumbnail_not_direct_frame':
+                  assert r['source_url'] in gallery.links,p
+              else:
+                  assert r['source_type']=='owner_supplied_video_frame',p
+                  assert len(r['source_video_sha256'])==64 and r['nominal_second']>=0,p
+                  assert r['location_verified'] is False,p
           print('Editorial source and image SHA verification PASS: 3/3')
           PY
       - run: npm install --no-save --package-lock=false playwright@1.51.1
@@ -121,7 +134,8 @@ jobs:
                   const bg=getComputedStyle(document.querySelector('.performance-background')).backgroundImage;
                   const url=bg.match(/url\(["']?(.*?)["']?\)/)?.[1];
                   const image=new Image(); image.src=url||''; await image.decode();
-                  return {galleryMatch:JSON.stringify(gallery)===JSON.stringify(allowed),background:bg,backgroundWidth:image.naturalWidth,genreLabels:[...document.querySelectorAll('.music-art-label')].map(e=>({text:e.textContent,visible:e.getBoundingClientRect().height>0}))};
+                  const ownerAllowed=['images/web/hero-1280.webp','images/editorial/night-city-live.webp','images/editorial/indoor-live-089s.webp','images/editorial/street-performance.webp','images/image.jpg','images/live-20260910.jpg'];
+                  return {galleryMatch:[allowed,ownerAllowed].some(x=>JSON.stringify(gallery)===JSON.stringify(x)),background:bg,backgroundWidth:image.naturalWidth,genreLabels:[...document.querySelectorAll('.music-art-label')].map(e=>({text:e.textContent,visible:e.getBoundingClientRect().height>0}))};
                 });
                 assert(documentary.galleryMatch,'Unexpected gallery source');
                 assert(documentary.background.includes('/images/image.jpg')&&documentary.backgroundWidth>0,'Performance background unavailable');
