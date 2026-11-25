@@ -216,9 +216,21 @@ jobs:
           EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
-          test "$(git ls-remote origin refs/heads/design/premium-editorial-v1 | cut -f1)" = "$EXPECTED_HEAD"
-          git add -- index.html style.css images/editorial/indoor-live-089s.webp images/editorial/night-city-live.webp images/editorial/street-performance.webp images/editorial/provenance.json images/editorial/thumbnail-provenance-archive.json glendalough-site-photos.zip
-          test "$(git diff --cached --name-only | wc -l)" -eq 8
+          actual="$(git rev-parse HEAD)"
+          echo "Expected HEAD: $EXPECTED_HEAD; checked out: $actual"
+          test "$actual" = "$EXPECTED_HEAD" || { echo "::error::Checkout HEAD mismatch"; exit 1; }
+          remote="$(git ls-remote --refs origin refs/heads/design/premium-editorial-v1 | awk '{print $1}')"
+          echo "Remote HEAD: $remote"
+          test "$remote" = "$EXPECTED_HEAD" || { echo "::error::Remote HEAD changed; do not push"; exit 1; }
+          git status --short
+          git add -A -- index.html style.css images/editorial/indoor-live-089s.webp images/editorial/night-city-live.webp images/editorial/street-performance.webp images/editorial/provenance.json images/editorial/thumbnail-provenance-archive.json glendalough-site-photos.zip
+          git diff --cached --no-renames --name-status
+          python3 - <<'PY'
+          import subprocess
+          expected=set("index.html style.css images/editorial/indoor-live-089s.webp images/editorial/night-city-live.webp images/editorial/street-performance.webp images/editorial/provenance.json images/editorial/thumbnail-provenance-archive.json glendalough-site-photos.zip".split())
+          # Null-delimited parsing avoids line count and rename detection ambiguity.
+          actual=set(subprocess.check_output(["git","diff","--cached","--no-renames","--name-only","-z"]).decode().split(chr(0)))-{""}
+          assert actual==expected, {"missing":sorted(expected-actual),"unexpected":sorted(actual-expected)}
+          PY
           git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Integrate exact owner-approved documentary photo candidates after browser QA'
           git push origin HEAD:refs/heads/design/premium-editorial-v1
