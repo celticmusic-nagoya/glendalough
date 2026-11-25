@@ -30,5 +30,22 @@
     "brightness": 1.08,
     "contrast": 1.08,
     "sha256": "575dd896d2966c1fd2db2521bc4317191c1b7e82eb20afd3aca3a2925b8ed97d"
+  },
+  {
+    "path": "images/editorial/street-live.webp",
+    "source_url": "https://www.youtube.com/watch?v=9d2jLKTgQtk",
+    "source_type": "official_video_thumbnail_not_direct_frame",
+    "review_artifact_id": 15009490656,
+    "reviewed_source_sha256": "dc682372433418e4dc67ded79b9d5db2852cf7c14b1903c3225d195fe6154b9e",
+    "crop": [
+      438,
+      246,
+      842,
+      475
+    ],
+    "brightness": 1.08,
+    "contrast": 1.06,
+    "location_verified": false,
+    "sha256": "373c85198c2588df4a2e9969f324ecee95e9f15ad57ecd2b8f77a0099d37e708"
   }
 ]
