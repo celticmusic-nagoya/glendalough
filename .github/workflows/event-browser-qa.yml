@@ -6,6 +6,7 @@ on:
       - 'en/**'
       - 'index.html'
       - 'style.css'
+      - 'images/**'
       - 'sitemap.xml'
       - '.github/workflows/event-browser-qa.yml'
 permissions:
@@ -19,14 +20,62 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: baseline
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify editorial photo provenance and source links
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          from html.parser import HTMLParser
+          class Gallery(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.inside=False
+                  self.images=[]
+                  self.links=[]
+              def handle_starttag(self, tag, attrs):
+                  a=dict(attrs)
+                  if tag=='section':
+                      self.inside=a.get('id')=='gallery'
+                  if self.inside and tag=='img': self.images.append(a.get('src'))
+                  if self.inside and tag=='a': self.links.append(a.get('href'))
+              def handle_endtag(self, tag):
+                  if tag=='section': self.inside=False
+          gallery=Gallery()
+          gallery.feed(Path('index.html').read_text())
+          records=json.loads(Path('images/editorial/provenance.json').read_text())
+          assert len(records)==3
+          assert len({x['path'] for x in records})==3
+          for r in records:
+              p=Path(r['path'])
+              assert p.parent==Path('images/editorial')
+              assert hashlib.sha256(p.read_bytes()).hexdigest()==r['sha256'],p
+              assert r['path'] in gallery.images,p
+              if r['source_type']=='official_video_thumbnail_not_direct_frame':
+                  assert r['source_url'] in gallery.links,p
+              else:
+                  assert r['source_type']=='owner_supplied_video_frame',p
+                  assert len(r['source_video_sha256'])==64 and r['nominal_second']>=0,p
+                  assert r['location_verified'] is False,p
+          print('Editorial source and image SHA verification PASS: 3/3')
+          PY
       - run: npm install --no-save --package-lock=false playwright@1.51.1
       - run: npx playwright install --with-deps chromium
       - run: |
           mkdir -p /tmp/site/glendalough screenshots
+          git ls-files images > screenshots/image-inventory.txt
+          cat screenshots/image-inventory.txt
           cp -a index.html style.css events en images sitemap.xml /tmp/site/glendalough/
+          mkdir -p /tmp/site/baseline
+          cp -a baseline/index.html baseline/style.css baseline/events baseline/en baseline/images baseline/sitemap.xml /tmp/site/baseline/
           python3 -m http.server 8765 --directory /tmp/site > /tmp/server.log 2>&1 &
           node <<'JS'
           const {chromium}=require('playwright');
@@ -38,10 +87,55 @@ jobs:
                 const page=await browser.newPage({viewport:{width,height:900}});
                 await page.goto('http://127.0.0.1:8765/glendalough/',{waitUntil:'domcontentloaded'});
                 await page.addStyleTag({content:'.reveal{opacity:1!important;transform:none!important}'});
+                await page.emulateMedia({reducedMotion:'reduce'});
+                await page.evaluate(()=>document.fonts.ready);
+                await page.screenshot({path:'screenshots/candidate-hero-'+width+'.png'});
+                const baseline=await browser.newPage({viewport:{width,height:900},reducedMotion:'reduce'});
+                await baseline.goto('http://127.0.0.1:8765/baseline/',{waitUntil:'domcontentloaded'});
+                await baseline.evaluate(()=>document.fonts.ready);
+                await baseline.screenshot({path:'screenshots/baseline-hero-'+width+'.png'});
+                await baseline.close();
+                const overflow=await page.evaluate(()=>({viewport:innerWidth,document:document.documentElement.scrollWidth,offenders:[...document.querySelectorAll('body *')].map(e=>({tag:e.tagName,cls:String(e.className),right:e.getBoundingClientRect().right,left:e.getBoundingClientRect().left,width:e.scrollWidth})).filter(e=>e.right>innerWidth+1||e.left< -1).slice(0,60)})); require('node:fs').writeFileSync('screenshots/overflow-'+width+'.json',JSON.stringify(overflow,null,2)); console.log('OVERFLOW',JSON.stringify(overflow)); assert(overflow.document<=width,'Home horizontal overflow at '+width);
                 assert.equal(await page.locator('#event').getAttribute('required'),null);
                 const optimized=await page.evaluate(async()=>{const imgs=[...document.querySelectorAll('img[srcset*="images/web/"]')];await Promise.all(imgs.map(async i=>{i.loading='eager';await i.decode()}));return imgs.map(i=>({src:i.currentSrc,width:i.naturalWidth}))});
                 assert.equal(optimized.length,4);
                 assert(optimized.every(i=>i.width>0 && i.src.endsWith('.webp')));
+                const gallery=await page.evaluate(async()=>{const imgs=[...document.querySelectorAll('#gallery img')];return Promise.all(imgs.map(async i=>{i.loading='eager';try{await i.decode()}catch{}return {src:i.getAttribute('src'),width:i.naturalWidth}}))});
+                assert.equal(gallery.length,6); require('node:fs').writeFileSync('screenshots/gallery-decode-'+width+'.json',JSON.stringify(gallery,null,2)); assert(gallery.every(i=>i.width>0),JSON.stringify(gallery));
+                await page.evaluate(async()=>{for(const i of document.images)i.loading='eager';await Promise.allSettled([...document.images].map(i=>i.decode()));});
+                const visual=await page.evaluate(()=>({logo:[...document.querySelectorAll('.header .logo-image')].map(e=>({loaded:e.naturalWidth>0,height:e.getBoundingClientRect().height,width:e.getBoundingClientRect().width})),captions:[...document.querySelectorAll('#gallery figcaption')].map(e=>({text:e.textContent,visible:e.getBoundingClientRect().height>0,fit:e.scrollWidth<=e.clientWidth&&e.scrollHeight<=e.clientHeight})),brokenLocal:[...document.images].filter(i=>new URL(i.src).origin===location.origin&&!i.naturalWidth).map(i=>i.src)}));
+                require('node:fs').writeFileSync('screenshots/visual-contract-'+width+'.json',JSON.stringify(visual,null,2));
+                assert(visual.logo.length>0 && visual.logo.every(i=>i.loaded&&i.height>=32&&i.width>0),'Logo visibility');
+                assert.equal(visual.captions.length,6);
+                assert(visual.captions.every(i=>i.visible&&i.fit),'Gallery caption clipping');
+                assert.equal(visual.brokenLocal.length,0,JSON.stringify(visual.brokenLocal));
+                await page.evaluate(()=>{document.activeElement.blur();document.querySelector('#gallery').scrollIntoView({block:'start',behavior:'instant'})});
+                const anchorFit=await page.evaluate(()=>({sectionTop:document.querySelector('#gallery').getBoundingClientRect().top,headerBottom:document.querySelector('.header').getBoundingClientRect().bottom,skipOpacity:getComputedStyle(document.querySelector('.skip-link')).opacity}));
+                assert(anchorFit.sectionTop>=anchorFit.headerBottom-1,JSON.stringify(anchorFit));
+                assert.equal(anchorFit.skipOpacity,'0');
+                await page.screenshot({path:'screenshots/gallery-anchor-'+width+'.png'});
+
+                await page.locator('#gallery').screenshot({path:'screenshots/gallery-'+width+'.png'});
+                // Documentary-first contract: performance background and gallery photo allowlist.
+                assert.equal(await page.locator('#works .work-item').count(),3);
+                assert.equal(await page.locator('#works img').count(),0);
+                assert.equal(await page.locator('#music .music-art-label').count(),6);
+                const documentary=await page.evaluate(async()=>{
+                  const allowed=['images/web/hero-1280.webp','images/editorial/night-session.jpg','images/editorial/indoor-session.jpg','images/editorial/street-live.webp','images/image.jpg','images/live-20260910.jpg'];
+                  const gallery=[...document.querySelectorAll('#gallery img')].map(e=>e.getAttribute('src'));
+                  const bg=getComputedStyle(document.querySelector('.performance-background')).backgroundImage;
+                  const url=bg.match(/url\(["']?(.*?)["']?\)/)?.[1];
+                  const image=new Image(); image.src=url||''; await image.decode();
+                  const ownerAllowed=['images/web/hero-1280.webp','images/editorial/night-city-live.webp','images/editorial/street-performance.webp','images/editorial/indoor-live-089s.webp','images/image.jpg','images/live-20260910.jpg'];
+                  return {galleryMatch:JSON.stringify(gallery)===JSON.stringify(ownerAllowed),background:bg,backgroundWidth:image.naturalWidth,genreLabels:[...document.querySelectorAll('.music-art-label')].map(e=>({text:e.textContent,visible:e.getBoundingClientRect().height>0}))};
+                });
+                assert(documentary.galleryMatch,'Unexpected gallery source');
+                assert(documentary.background.includes('/images/image.jpg')&&documentary.backgroundWidth>0,'Performance background unavailable');
+                assert(documentary.genreLabels.every(x=>x.visible&&x.text==='音楽イメージ'));
+                require('node:fs').writeFileSync('screenshots/documentary-'+width+'.json',JSON.stringify(documentary,null,2));
+                await page.locator('#performance').screenshot({path:'screenshots/performance-section-'+width+'.png'});
+                await page.locator('#works').screenshot({path:'screenshots/works-'+width+'.png'});
+
                 await page.screenshot({path:'screenshots/home-'+width+'.png',fullPage:true});
                 const metrics=await page.evaluate(()=>{const n=performance.getEntriesByType('navigation')[0];return {domContentLoadedMs:n.domContentLoadedEventEnd,resources:performance.getEntriesByType('resource').map(r=>({url:r.name,transferBytes:r.transferSize,durationMs:r.duration})),images:[...document.images].map(i=>({src:i.getAttribute('src'),loading:i.loading}))}});
                 require('node:fs').writeFileSync('screenshots/performance-'+width+'.json',JSON.stringify(metrics,null,2));
@@ -55,7 +149,7 @@ jobs:
                 assert.equal(await page.locator('link[hreflang="en"]').count(),1);
                 await page.keyboard.press('Tab');
                 await page.locator('.skip-link').focus();
-                assert(await page.locator('.skip-link').evaluate(e=>e.getBoundingClientRect().top>=0));
+                await page.waitForFunction(()=>{const e=document.querySelector('.skip-link');return document.activeElement===e && e.getBoundingClientRect().top>=0},{},{timeout:3000});
                 const english=await page.goto('http://127.0.0.1:8765/glendalough/en/');
                 assert.equal(english.status(),200);
                 assert.equal(await page.locator('html').getAttribute('lang'),'en');

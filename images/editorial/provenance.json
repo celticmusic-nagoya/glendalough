@@ -1,0 +1,84 @@
+[
+  {
+    "path": "images/editorial/night-city-live.webp",
+    "sha256": "b7fcad2820593923aba8958607961ad2dfca6c1403327ce475675ff4b2cb11be",
+    "source_type": "owner_supplied_video_frame",
+    "source_filename": "VID_20260708_105322_1.mp4",
+    "source_video_sha256": "80052caf0bd2fd4fe3a4d6376406df294079049b3aaf48a78285ebd0de533f24",
+    "nominal_second": 102.54,
+    "crop": [
+      0,
+      650,
+      1080,
+      1920
+    ],
+    "grade": {
+      "gamma": 0.77,
+      "contrast": 1.04,
+      "saturation": 0.94,
+      "unsharp_radius": 0.8,
+      "unsharp_percent": 38,
+      "unsharp_threshold": 5
+    },
+    "dimensions": [
+      1080,
+      1270
+    ],
+    "location_verified": false
+  },
+  {
+    "path": "images/editorial/indoor-live-089s.webp",
+    "sha256": "b320068e7586f6d01679cf3d4f6dac9a40bd22628cf917739c8143da7a0144f8",
+    "source_type": "owner_supplied_video_frame",
+    "source_filename": "2026-09-14-083940441.mp4",
+    "source_video_sha256": "5b6418ae26fb6dec050d69daa365130092a197e7b86750922a17d7d3509737f6",
+    "nominal_second": 89,
+    "crop": [
+      0,
+      656,
+      1080,
+      1264
+    ],
+    "grade": {
+      "gamma": 0.88,
+      "saturation": 0.93,
+      "contrast": 1.045,
+      "unsharp_radius": 0.9,
+      "unsharp_percent": 45,
+      "unsharp_threshold": 4
+    },
+    "dimensions": [
+      1080,
+      608
+    ],
+    "location_verified": false,
+    "approved_by_user": true
+  },
+  {
+    "path": "images/editorial/street-performance.webp",
+    "sha256": "987b24413e379f0a8554e390cf2c5c78e637aea9fdbe69eb9a0cf71294f104d9",
+    "source_type": "owner_supplied_video_frame",
+    "source_filename": "VID_20260807_082420_898_bsl.mp4",
+    "source_video_sha256": "d225bb7513e14f0b2c1fdd9d42579b058d6a1770272dac69b6cd40ea3e108aed",
+    "nominal_second": 43.16,
+    "crop": [
+      0,
+      1080,
+      2160,
+      3780
+    ],
+    "grade": {
+      "gamma": 0.74,
+      "contrast": 1.04,
+      "saturation": 0.96,
+      "unsharp_radius": 0.8,
+      "unsharp_percent": 38,
+      "unsharp_threshold": 5
+    },
+    "dimensions": [
+      1152,
+      1440
+    ],
+    "location_verified": false
+  }
+]

@@ -1741,7 +1741,7 @@ button {
 
     inset: 0;
 
-    background-image: url("images/performance.jpg");
+    background-image: url("images/image.jpg");
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
@@ -3204,3 +3204,257 @@ object-fit:contain;
 .skip-link:focus{transform:none}
 :focus-visible{outline:2px solid #d6b779;outline-offset:4px}
 @media(prefers-reduced-motion:reduce){.reveal,.hero-reveal{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}html{scroll-behavior:auto!important}}
+
+
+/* =====================================================
+   PREMIUM EDITORIAL DIRECTION v1
+   Design-only prototype; original brand palette retained.
+===================================================== */
+:root{
+  --editorial-gutter:clamp(24px,7.2vw,112px);
+  --editorial-ink:#101510;
+  --editorial-paper:#e9e3d4;
+  --editorial-gold:#c4ad78;
+}
+.header{background:linear-gradient(180deg,rgba(9,14,10,.72),transparent)}
+.header.scrolled{background:rgba(12,18,13,.94);backdrop-filter:blur(18px)}
+.header-inner{width:calc(100% - 2*var(--editorial-gutter));max-width:none}
+.logo-image{height:37px}
+.nav{gap:clamp(14px,1.7vw,28px);font-size:10px;letter-spacing:.18em}
+.nav-contact{padding:11px 20px!important}
+.hero{min-height:720px;height:min(920px,100svh);justify-content:flex-start;text-align:left}
+.hero-background{transform:scale(1.02);background-position:center 44%}
+.hero-overlay{background:linear-gradient(90deg,rgba(8,13,9,.86) 0%,rgba(8,13,9,.66) 37%,rgba(8,13,9,.12) 78%),linear-gradient(0deg,rgba(8,13,9,.58),transparent 48%)}
+.hero-content{width:min(100%,1120px);max-width:none;margin-left:var(--editorial-gutter);padding:80px 30px 90px 0}
+.hero-symbol{width:54px;margin:0 0 34px;opacity:.82}
+.hero-eyebrow{font-size:10px;letter-spacing:.42em;margin-bottom:28px}
+.hero h1{font-size:clamp(54px,8.2vw,116px);letter-spacing:.09em;line-height:.98}
+.hero-copy{max-width:480px;margin-top:28px;font-size:clamp(14px,1.4vw,18px);line-height:2;letter-spacing:.12em;color:rgba(245,240,225,.88)}
+.hero .button{margin-top:38px;min-width:218px;justify-content:space-between}
+.hero-scroll{left:auto;right:var(--editorial-gutter);bottom:54px;transform:none;align-items:flex-start;letter-spacing:.38em}
+.scroll-line{height:68px}
+.hero:after{content:"NAGOYA  /  JAPAN";position:absolute;right:var(--editorial-gutter);top:50%;writing-mode:vertical-rl;transform:translateY(-50%);font:9px var(--display);letter-spacing:.35em;color:rgba(240,231,208,.72);z-index:2}
+.section{padding:clamp(100px,12vw,176px) 0}
+.section-heading{align-items:flex-start;gap:clamp(24px,5vw,76px);margin-bottom:clamp(54px,7vw,100px)}
+.section-number{padding-top:9px;font-size:11px}
+.section-label,.music-section-label{letter-spacing:.42em}
+.section h2{font-size:clamp(38px,5.4vw,76px);letter-spacing:.035em;line-height:1.03}
+.about-section{background:linear-gradient(115deg,#101510 0%,#172219 100%)}
+.about-grid{grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:clamp(42px,8vw,130px)}
+.about-text{max-width:590px;padding-left:clamp(0px,3vw,42px)}
+.about-text .lead{font-size:clamp(23px,2.6vw,34px);line-height:1.65;letter-spacing:.035em}
+.about-text p:not(.lead){font-size:14px;line-height:2.25;letter-spacing:.035em}
+.about-image{margin:18px 0 30px}
+.about-image img{aspect-ratio:4/5;object-fit:cover}
+.image-caption{right:-24px;bottom:-24px;padding:17px 22px;letter-spacing:.22em}
+.music-section{padding:clamp(110px,13vw,185px) 0}
+.music-container{width:min(1280px,calc(100% - 2*var(--editorial-gutter)))}
+.music-section-heading{max-width:920px;margin:0 0 clamp(75px,10vw,140px) auto;text-align:left}
+.music-section-heading h2{font-size:clamp(64px,10vw,138px);line-height:.82;letter-spacing:-.015em}
+.music-intro{max-width:470px;margin-top:32px;margin-left:auto;text-align:left;line-height:2.15}
+.music-category{margin-bottom:clamp(95px,12vw,165px)}
+.music-category-heading{align-items:flex-end;margin-bottom:34px;padding-bottom:22px}
+.music-category-heading h3{font-size:clamp(38px,5vw,64px)}
+.music-category-description{font-size:12px;line-height:2}
+.music-card-grid{grid-template-columns:1.12fr .88fr .88fr;gap:18px;align-items:start}
+.music-card:nth-child(2){margin-top:62px}
+.music-card:nth-child(3){margin-top:124px}
+.music-card{background:transparent;border:0;border-bottom:1px solid rgba(232,227,213,.2)}
+.music-card:hover{transform:translateY(-5px);background:transparent;border-color:var(--gold)}
+.music-card-image{aspect-ratio:4/5}
+.music-card-content{padding:24px 4px 30px}
+.music-card-content h4{font-size:clamp(19px,2vw,25px)}
+.music-card-content>p:not(.music-card-type){font-size:12px;line-height:2.1}
+.music-category-beyond .music-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.music-category-beyond .music-card:nth-child(n){margin-top:0}
+.music-video-area{margin-top:clamp(80px,10vw,140px)}
+.live-section,.performance-section,.contact-section{padding-top:clamp(100px,12vw,170px);padding-bottom:clamp(100px,12vw,170px)}
+@media(max-width:900px){
+ .header-inner{width:calc(100% - 44px)}
+ .hero{min-height:680px}
+ .hero-content{margin-left:34px;width:calc(100% - 68px)}
+ .hero:after{display:none}
+ .about-grid{gap:44px}
+ .music-card-grid{gap:14px}
+}
+@media(max-width:600px){
+ .header-inner{width:calc(100% - 40px);height:76px}
+ .logo-image{height:29px}
+ .hero{min-height:690px;height:92svh;max-height:850px}
+ .hero-background{background-position:57% center}
+ .hero-overlay{background:linear-gradient(90deg,rgba(8,13,9,.78),rgba(8,13,9,.24)),linear-gradient(0deg,rgba(8,13,9,.68),transparent 70%)}
+ .hero-content{margin-left:24px;width:calc(100% - 48px);padding:70px 0 86px}
+ .hero-symbol{width:44px;margin-bottom:28px}
+ .hero-eyebrow{font-size:8px;letter-spacing:.28em}
+ .hero h1{white-space:normal;font-size:clamp(43px,11.3vw,62px);letter-spacing:.015em;overflow-wrap:anywhere}
+ .hero-copy{font-size:12px;line-height:2;letter-spacing:.06em}
+ .hero .button{min-width:0;width:min(100%,270px);padding:15px 18px}
+ .hero-scroll{right:24px;bottom:28px}
+ .scroll-line{height:40px}
+ .section{padding:88px 0}
+ .section-heading{gap:18px;margin-bottom:44px}
+ .section h2{font-size:clamp(34px,9vw,48px)}
+ .about-grid{grid-template-columns:1fr;gap:38px}
+ .about-text{padding:0}
+ .about-text .lead{font-size:23px}
+ .about-image{margin:0 10px 18px 0}
+ .about-image img{aspect-ratio:5/4}
+ .image-caption{right:-10px;bottom:-12px;padding:12px 14px;font-size:8px}
+ .music-section{padding:92px 0}
+ .music-container{width:calc(100% - 48px)}
+ .music-section-heading{margin:0 0 74px}
+ .music-section-heading h2{font-size:clamp(54px,15vw,76px)}
+ .music-intro{font-size:13px;margin-top:24px}
+ .music-category{margin-bottom:88px}
+ .music-category-heading{display:block;margin-bottom:25px}
+ .music-category-heading h3{font-size:40px}
+ .music-category-description{text-align:left;margin-top:14px}
+ .music-card-grid,.music-category-beyond .music-card-grid{grid-template-columns:1fr;gap:32px}
+ .music-card:nth-child(n){margin-top:0}
+ .music-card-image{aspect-ratio:5/4}
+ .music-card-content{padding:19px 2px 24px}
+ .music-card-content h4{font-size:22px}
+ .music-video-content{gap:24px}
+ .live-section,.performance-section,.contact-section{padding:88px 0}
+}
+@media(prefers-reduced-motion:reduce){
+ .hero-background{animation:none;transform:none}
+}
+
+/* Mobile editorial fit and explicit keyboard focus visibility. */
+.skip-link:focus{transform:none!important;top:8px!important;visibility:visible!important;opacity:1!important;transition:none!important}
+@media(max-width:600px){
+ .hero h1{white-space:nowrap;overflow-wrap:normal;font-size:clamp(24px,8.1vw,48px);letter-spacing:.015em}
+ .logo-image{height:34px}
+ .hero-overlay{background:linear-gradient(90deg,rgba(8,13,9,.84),rgba(8,13,9,.32)),linear-gradient(0deg,rgba(8,13,9,.72),transparent 70%)}
+ .hero-scroll{bottom:36px}
+}
+
+/* Measured at 768px: caption right edge 772px. Keep within figure at tablet widths. */
+@media (min-width:601px) and (max-width:900px){.about-image .image-caption{right:0;max-width:100%;box-sizing:border-box}}
+
+/* Editorial readability and existing performance video presentation. */
+.music-video-heading h3{line-height:1.12;text-wrap:balance}
+.youtube-short{min-width:0;max-width:100%;overflow:hidden;border-radius:4px}
+.youtube-short iframe{display:block;width:100%;border:0}
+.music-youtube-link{min-height:44px}
+@media(max-width:600px){
+ .hero-copy{font-size:14px;line-height:1.8;letter-spacing:.035em}
+ .hero-eyebrow{font-size:9px;letter-spacing:.2em}
+ .hero .button-primary{font-size:14px;min-height:48px}
+ .music-video-content{gap:24px}
+ .music-video-heading h3{font-size:clamp(28px,8vw,44px)}
+}
+@media(min-width:601px) and (max-width:900px){
+ .hero h1{font-size:clamp(42px,7.2vw,66px);letter-spacing:.045em}
+ .section-heading{gap:28px;margin-bottom:56px}
+ .music-section-heading h2{font-size:clamp(56px,9vw,82px)}
+}
+
+/* Brand hierarchy: use available mobile width without clipping the wordmark. */
+.header{background:linear-gradient(180deg,rgba(9,14,10,.94),rgba(9,14,10,.35) 80%,transparent)}
+.logo-image{filter:drop-shadow(0 1px 3px rgba(0,0,0,.65))}
+.hero h1{text-shadow:0 2px 18px rgba(0,0,0,.38)}
+@media(max-width:600px){
+ .hero-content{margin-left:20px;width:calc(100% - 40px)}
+ .hero h1{font-size:clamp(26px,9vw,50px);letter-spacing:0}
+ .logo-image{height:38px;max-width:calc(100vw - 104px);object-fit:contain}
+ .menu-button{min-width:44px;min-height:44px}
+}
+
+/* Gallery: editorial rhythm, six existing photographs, no empty grid cells. */
+.gallery-grid{grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:clamp(140px,18vw,260px);gap:clamp(10px,1.6vw,24px)}
+.gallery-grid .gallery-item{margin:0;min-width:0;grid-column:span 4;grid-row:span 1}
+.gallery-grid .gallery-item:nth-child(1){grid-column:span 7;grid-row:span 2}
+.gallery-grid .gallery-item:nth-child(2),.gallery-grid .gallery-item:nth-child(3){grid-column:span 5}
+.gallery-grid .gallery-item img{display:block}
+.social-film-links{font-size:13px;line-height:2.1;overflow-wrap:anywhere}
+.social-film-links a{text-decoration:underline;text-underline-offset:4px;color:var(--gold)}
+.social-film-links a:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+@media(max-width:900px){.gallery-grid{grid-auto-rows:clamp(130px,22vw,220px)}}
+@media(max-width:600px){
+ .gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:auto;gap:12px}
+ .gallery-grid .gallery-item:nth-child(n){grid-column:span 1;grid-row:span 1;aspect-ratio:4/5}
+ .gallery-grid .gallery-item:nth-child(1),.gallery-grid .gallery-item:nth-child(6){grid-column:span 2;aspect-ratio:5/3}
+}
+@media(prefers-reduced-motion:reduce){.gallery-item img{transition:none}.gallery-item:hover img{transform:none}}
+
+/* Keep archival poster intact and anchor headings below fixed navigation. */
+#gallery{scroll-margin-top:100px}
+.gallery-grid .gallery-item:nth-child(6) img{object-fit:contain;background:#101510}
+
+.gallery-grid .gallery-item{position:relative}
+.gallery-grid figcaption{position:absolute;inset:auto 0 0;padding:10px 12px;background:rgba(10,16,12,.94);color:#e9e3d4;font-size:10px;line-height:1.5;letter-spacing:.09em}
+.gallery-grid .gallery-item:has(figcaption) img{height:calc(100% - 36px)}
+@media(max-width:600px){.gallery-grid figcaption{font-size:9px;letter-spacing:0}}
+
+/* Brand legibility: retain original wordmark, strengthen its surrounding contrast. */
+.header{background:linear-gradient(180deg,rgba(9,14,10,.98),rgba(9,14,10,.78) 65%,rgba(9,14,10,0))}
+.header.scrolled{background:rgba(12,18,13,.97)}
+.logo-image{height:46px;width:auto;object-fit:contain}
+@media(max-width:900px){.logo-image{height:40px;max-width:calc(100vw - 104px)}}
+@media(max-width:600px){.logo-image{height:38px}}
+
+/* Keep keyboard-only navigation hidden until focus, including full-page captures. */
+.skip-link:not(:focus){opacity:0;pointer-events:none;clip-path:inset(50%)}
+.skip-link:focus{clip-path:none;pointer-events:auto}
+/* Apply the fixed-header offset to every navigable section. */
+main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
+@media(max-width:600px){main section[id]{scroll-margin-top:96px}}
+
+/* Documentary photo: retain the three musicians and original setting. */
+.gallery-grid .gallery-item:first-child img{object-position:50% 78%;filter:saturate(.84) contrast(1.04) brightness(1.06)}
+@media(max-width:600px){.gallery-grid .gallery-item:first-child{aspect-ratio:4/3}}
+
+/* Documentary thumbnails: retain the complete reviewed crop rather than cut musicians. */
+.gallery-film{display:block;color:inherit;text-decoration:underline;text-underline-offset:3px}
+.gallery-grid .gallery-item:has(.gallery-film) img{object-fit:contain;background:#101510}
+.gallery-film:focus-visible{outline:2px solid #d6b779;outline-offset:-3px}
+.gallery-grid .gallery-item:has(.gallery-film) figcaption{font-size:10px;letter-spacing:.02em}
+@media(max-width:600px){.gallery-grid .gallery-item:has(.gallery-film) figcaption{font-size:9px}}
+
+/* Pair portrait-oriented documentary thumbnails beside the ensemble image. */
+@media(min-width:901px){
+ .gallery-grid{grid-auto-rows:clamp(220px,24vw,340px)}
+ .gallery-grid .gallery-item:nth-child(1){grid-column:span 6;grid-row:span 1}
+ .gallery-grid .gallery-item:nth-child(2),.gallery-grid .gallery-item:nth-child(3){grid-column:span 3;grid-row:span 1}
+}
+.gallery-grid .gallery-item:has(.gallery-film) figcaption{min-height:36px;box-sizing:border-box;display:flex;align-items:center;line-height:1.45}
+@media(max-width:600px){.gallery-grid .gallery-item:has(.gallery-film) figcaption{padding:6px 8px;font-size:10px;min-height:36px}}
+
+/* Documentary-first policy: booking cards describe services, not invented event records. */
+.works-grid .work-item{border-top:2px solid rgba(184,154,91,.45)}
+.works-grid .work-info{padding:clamp(22px,3vw,40px)}
+.performance-background{background-position:center 58%}
+.performance-overlay{background:linear-gradient(90deg,rgba(10,15,10,.95),rgba(10,15,10,.73) 42%,rgba(10,15,10,.25) 100%)}
+.gallery-grid .gallery-item:nth-child(5) img{object-fit:contain;background:#101510}
+.music-art-label{position:absolute;bottom:12px;right:12px;padding:4px 8px;background:rgba(10,15,10,.85);color:#eee9dc;font-size:11px;line-height:1.4}
+@media(max-width:600px){.performance-background{background-position:60% center}.performance-overlay{background:rgba(10,15,10,.72)}}
+
+/* Mobile documentary photograph: show the full ensemble, then the booking copy. */
+@media(max-width:600px){
+ .performance-section{display:flex;flex-direction:column;align-items:stretch;min-height:0;padding:0 0 72px;background:#101510}
+ .performance-background{position:relative;inset:auto;width:100%;aspect-ratio:4/3;background-size:contain;background-position:center;background-color:#101510;flex:none}
+ .performance-overlay{display:none}
+ .performance-container{padding-top:32px}
+ .performance-content h2{font-size:clamp(30px,9vw,42px);line-height:1.15;letter-spacing:.035em}
+ .performance-content .button{min-height:44px}
+}
+
+/* Preserve complete documentary compositions. */
+.gallery-grid .gallery-item:nth-child(2) img,.gallery-grid .gallery-item:nth-child(3) img,.gallery-grid .gallery-item:nth-child(4) img{object-fit:contain;background:#101510}
+
+/* Match documentary image proportions instead of shrinking the landscape live photo. */
+@media(min-width:901px){
+ .gallery-grid .gallery-item:nth-child(4){grid-column:span 6}
+ .gallery-grid .gallery-item:nth-child(5),.gallery-grid .gallery-item:nth-child(6){grid-column:span 3}
+}
+@media(min-width:601px) and (max-width:900px){
+ .gallery-grid .gallery-item:nth-child(1),.gallery-grid .gallery-item:nth-child(4){grid-column:span 6;grid-row:span 1}
+ .gallery-grid .gallery-item:nth-child(2),.gallery-grid .gallery-item:nth-child(3),.gallery-grid .gallery-item:nth-child(5),.gallery-grid .gallery-item:nth-child(6){grid-column:span 3;grid-row:span 1}
+}
+@media(max-width:600px){
+ .gallery-grid .gallery-item:nth-child(4){grid-column:span 2;aspect-ratio:16/10}
+ .gallery-grid .gallery-item:nth-child(6){grid-column:span 1;aspect-ratio:4/5}
+}
+.gallery-grid figcaption{overflow-wrap:anywhere}
