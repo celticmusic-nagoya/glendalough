@@ -37,9 +37,27 @@ async function capture(page,id,url,fixture=false){
    return false
   };
   if(await gate()){result.status='ACCESS_OR_PLAYBACK_RESTRICTED';return result}
+  // The prior evidence shows an optional registration overlay (Instagram)
+  // and an explicit Skip control (TikTok). Use only these normal UI controls.
+  if(!fixture&&id==='instagram-01'){
+   const modal=page.getByRole('dialog').filter({hasText:/投稿を見逃さず|登録して|Sign up/i}).first();
+   const close=modal.getByRole('button',{name:/^(Close|閉じる|閉じるボタン)$/i}).first();
+   if(await close.isVisible().catch(()=>false)){await close.click({timeout:5000});result.optional_prompt='dismissed'}
+   else result.optional_prompt='no_accessible_close_control';
+  }
+  if(!fixture&&id==='tiktok-01'){
+   const skip=page.getByText('スキップ',{exact:true}).first();
+   if(await skip.isVisible().catch(()=>false)){await skip.click({timeout:5000});result.optional_prompt='skipped'}
+   else result.optional_prompt='no_skip_control';
+  }
+  if(!fixture)await page.waitForTimeout(2000);
   phase='video-discovery';
   await page.waitForTimeout(6000);
   if(await gate()){result.status='ACCESS_OR_PLAYBACK_RESTRICTED';return result}
+  if(!fixture){
+   const text=await page.locator('body').innerText({timeout:3000}).catch(()=>null);
+   if(!text||/この動画の再生にエラー|動画を読み込めません|動画の再生に失敗|error playing this video|could not play|couldn.t play/i.test(text)){result.status='PLAYBACK_ERROR';return result}
+  }
   const videos=[];
   for(const frame of page.frames())for(const v of await frame.locator('video:visible').all())videos.push(v);
   result.visible_video_count=videos.length;
@@ -50,6 +68,7 @@ async function capture(page,id,url,fixture=false){
    const box=await v.boundingBox();
    if(box&&box.width*box.height>area){video=v;area=box.width*box.height}
   }
+  if(!fixture&&videos.length!==1){result.status='AMBIGUOUS_VIDEO_TARGET';return result}
   if(!video||area<40000){result.status='VIDEO_TOO_SMALL';return result}
   phase='playback';
   await video.scrollIntoViewIfNeeded({timeout:5000});
@@ -108,7 +127,7 @@ async function capture(page,id,url,fixture=false){
   await fixture.close();save();
   if(report.smoke.frames.length<10)throw Error('Local playback screenshot smoke failed');
   // One diagnostic attempt per platform after the first failed batch.
-  for(const [id,url] of sources.filter(([id])=>['youtube-street','instagram-01','tiktok-01'].includes(id))){
+  for(const [id,url] of sources.filter(([id])=>['instagram-01','tiktok-01'].includes(id))){
    // Fresh browser context per source; no stored credentials or anti-detection measures.
    const ctx=await browser.newContext({viewport:{width:1920,height:1080},deviceScaleFactor:1,locale:'ja-JP'});
    const page=await ctx.newPage();
