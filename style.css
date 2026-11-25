@@ -3401,3 +3401,7 @@ object-fit:contain;
 /* Apply the fixed-header offset to every navigable section. */
 main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
 @media(max-width:600px){main section[id]{scroll-margin-top:96px}}
+
+/* Documentary photo: retain the three musicians and original setting. */
+.gallery-grid .gallery-item:first-child img{object-position:50% 78%;filter:saturate(.84) contrast(1.04) brightness(1.06)}
+@media(max-width:600px){.gallery-grid .gallery-item:first-child{aspect-ratio:4/3}}
