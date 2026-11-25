@@ -26,3 +26,73 @@ jobs:
         with:
           name: official-media-review
           path: media-review/
+
+  stage-street-photo:
+    if: github.event.pull_request.number == 10 && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'design/premium-editorial-v1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Check if reviewed photograph already registered
+        id: preflight
+        run: |
+          if test -f images/editorial/street-live.webp; then echo "needed=false" >> "$GITHUB_OUTPUT"; else echo "needed=true" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/download-artifact@v4
+        if: steps.preflight.outputs.needed == 'true'
+        with:
+          name: official-media-review
+          run-id: 45586588126
+          github-token: ${{ github.token }}
+          path: /tmp/reviewed-media
+      - uses: actions/setup-python@v5
+        if: steps.preflight.outputs.needed == 'true'
+        with:
+          python-version: '3.12'
+      - if: steps.preflight.outputs.needed == 'true'
+        run: pip install Pillow==11.2.1
+      - name: Crop only the reviewed central performance image and integrate gallery
+        if: steps.preflight.outputs.needed == 'true'
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageEnhance
+          import hashlib,json
+          src=Path('/tmp/reviewed-media/youtube-9d2jLKTgQtk.webp')
+          expected='dc682372433418e4dc67ded79b9d5db2852cf7c14b1903c3225d195fe6154b9e'
+          assert hashlib.sha256(src.read_bytes()).hexdigest()==expected
+          with Image.open(src) as im:
+              assert im.size==(1280,720)
+              im=im.convert('RGB').crop((438,246,842,475))
+          im=ImageEnhance.Brightness(im).enhance(1.08)
+          im=ImageEnhance.Contrast(im).enhance(1.06)
+          dst=Path('images/editorial/street-live.webp')
+          im.save(dst,'WEBP',quality=88,method=6)
+          with Image.open(dst) as check: check.load(); assert check.size==(404,229)
+          manifest=Path('images/editorial/provenance.json')
+          records=json.loads(manifest.read_text())
+          assert not any(x['path']==str(dst) for x in records)
+          records.append(dict(path=str(dst),source_url='https://www.youtube.com/watch?v=9d2jLKTgQtk',source_type='official_video_thumbnail_not_direct_frame',review_artifact_id=15009490656,reviewed_source_sha256=expected,crop=[438,246,842,475],brightness=1.08,contrast=1.06,location_verified=False,sha256=hashlib.sha256(dst.read_bytes()).hexdigest()))
+          manifest.write_text(json.dumps(records,indent=2)+'\n')
+          html=Path('index.html')
+          body=html.read_bytes().decode('utf-8')
+          old='<figure class="gallery-item reveal"><img src="images/performance4.jpg" alt="イベント演奏のイメージイラスト" loading="lazy"><figcaption>ILLUSTRATION — イベント</figcaption></figure>'
+          new='<figure class="gallery-item reveal"><img src="images/editorial/street-live.webp" alt="夜の街角でフィドル、アコーディオン、弦楽器を演奏する人々" width="404" height="229" loading="lazy"><figcaption><a class="gallery-film" href="https://www.youtube.com/watch?v=9d2jLKTgQtk">路上演奏｜動画サムネイル</a></figcaption></figure>'
+          assert body.count(old)==1
+          html.write_bytes(body.replace(old,new).encode('utf-8'))
+          PY
+      - name: Commit reviewed photograph and markup atomically
+        if: steps.preflight.outputs.needed == 'true'
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git ls-remote origin refs/heads/design/premium-editorial-v1 | cut -f1)" = "$EXPECTED_HEAD"
+          git add images/editorial/street-live.webp images/editorial/provenance.json index.html
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Add reviewed street performance thumbnail and source link'
+          git push origin HEAD:refs/heads/design/premium-editorial-v1
