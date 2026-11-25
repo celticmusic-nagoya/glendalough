@@ -30,12 +30,12 @@ def extract(path,folder,limit=90):
     duration=float(meta["format"]["duration"])
     assert math.isfinite(duration) and duration>0
     step=max(1,math.ceil(duration/limit))
-    run(["ffmpeg","-nostdin","-v","error","-i",str(path),"-map","0:v:0","-vf",f"fps=1/{step}:start_time=0,scale=1280:1280:force_original_aspect_ratio=decrease","-frames:v",str(limit),"-q:v","2",str(folder/"frame-%04d.jpg")],120)
+    run(["ffmpeg","-nostdin","-v","error","-i",str(path),"-map","0:v:0","-vf",f"fps=1/{step}:start_time=0,scale=w=\'min(1280,iw)\':h=\'min(1280,ih)\':force_original_aspect_ratio=decrease","-frames:v",str(limit),"-q:v","2",str(folder/"frame-%04d.jpg")],120)
     frames=sorted(folder.glob("frame-*.jpg"))
     assert frames,"No extracted frames"
     return frames,step,duration
 def report_frames(frames,step,folder):
-    rows=[]; accepted=[]; prev=None
+    rows=[]; accepted=[]; seen=[]
     for i,p in enumerate(frames):
         with Image.open(p) as img:
             im=img.convert("RGB")
@@ -45,11 +45,11 @@ def report_frames(frames,step,folder):
         # simple average hash: reject near identical frames, retain review candidates
         tiny=small.resize((8,8)); pix=list(tiny.getdata()); avg=sum(pix)/64
         bits=sum((x>avg)<<j for j,x in enumerate(pix))
-        duplicate=prev is not None and (prev^bits).bit_count()<=3
-        prev=bits
-        rec={"file":p.name,"sample_index":i,"nominal_second":i*step,"sha256":sha(p),"width":im.width,"height":im.height,"edge_stddev":round(sharp,2),"mean_luma":round(lum,2),"near_previous":duplicate}
+        duplicate=any((old^bits).bit_count()<=3 for old in seen)
+        seen.append(bits)
+        rec={"file":p.name,"sample_index":i,"nominal_second":i*step,"sha256":sha(p),"width":im.width,"height":im.height,"edge_stddev":round(sharp,2),"mean_luma":round(lum,2),"near_duplicate":duplicate}
         rows.append(rec)
-        if not duplicate: accepted.append((p,rec))
+        if not duplicate and 18<=lum<=240 and sharp>=5: accepted.append((p,rec))
     # Sharpness is a sorting hint, not a visual or privacy verdict.
     selected=sorted(accepted,key=lambda item:item[1]["edge_stddev"],reverse=True)[:24]
     selected.sort(key=lambda item:item[1]["sample_index"])
@@ -58,7 +58,16 @@ def report_frames(frames,step,folder):
     for j,(p,rec) in enumerate(selected):
         x,y=j%4*320,j//4*224
         with Image.open(p) as img:
-            thumb=ImageOps.contain(img.convert("RGB"),(312,194))
+            im=img.convert("RGB")
+            # Conservative grading; never invent detail or crop people automatically.
+            im=ImageEnhance.Brightness(im).enhance(1.05 if rec["mean_luma"]<110 else 1.0)
+            im=ImageEnhance.Contrast(im).enhance(1.04)
+            candidate=folder/(p.stem+".webp")
+            im.save(candidate,"WEBP",quality=88,method=6)
+            with Image.open(candidate) as check: check.load(); assert check.size==im.size
+            rec["candidate_file"]=candidate.name
+            rec["candidate_sha256"]=sha(candidate)
+            thumb=ImageOps.contain(im,(312,194))
         sheet.paste(thumb,(x+(320-thumb.width)//2,y+(194-thumb.height)//2))
         draw.text((x+6,y+199),f'{p.name} ~{rec["nominal_second"]}s',fill="white")
     sheet.save(folder/"contact-sheet.jpg",quality=88)
@@ -133,7 +142,12 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--local",type=Path,nargs="*",default=[])
     parser.add_argument("--instagram",action="store_true")
+    parser.add_argument("--output",type=Path,default=Path("video-review"))
+    parser.add_argument("--self-test",action="store_true")
     args=parser.parse_args()
+    global OUT
+    OUT=args.output
+    OUT.mkdir(parents=True,exist_ok=True)
     report={"ffmpeg":version(["ffmpeg","-version"]),"ffprobe":version(["ffprobe","-version"]),"sources":[]}
     with tempfile.TemporaryDirectory() as tmp:
         tmp=Path(tmp)
@@ -142,6 +156,19 @@ def main():
         frames,step,duration=extract(fixture,tmp/"smoke-frames")
         assert len(frames)==3
         report["smoke_test"]={"status":"PASS","frames":len(frames),"synthetic_test_only":True}
+        if args.self_test:
+            # Test the same extraction and grading code used for owner-supplied originals,
+            # in an isolated temporary folder. Do not publish synthetic images.
+            test=tmp/"owner-export-test"
+            test_frames,test_step,_=extract(fixture,test)
+            rows=report_frames(test_frames,test_step,test)
+            assert len(rows)==3 and all(x["width"]==640 and x["height"]==360 for x in rows)
+            assert (test/"contact-sheet.jpg").is_file()
+            assert any(x.get("candidate_file") for x in rows)
+            for rec in rows:
+                if rec.get("candidate_file"):
+                    assert sha(test/rec["candidate_file"])==rec["candidate_sha256"]
+            report["owner_export_pipeline_test"]={"status":"PASS","frames":len(rows),"candidate_count":sum(bool(x.get("candidate_file")) for x in rows),"synthetic_test_only":True}
         for i,source in enumerate(args.local):
             item={"platform":"owner_export","id":f"local-{i+1:02d}","source_type":"owner_supplied_video","location_verified":False}
             try:
@@ -151,8 +178,8 @@ def main():
                 item.update(status="EXTRACTION_BLOCKED",error=safe_error(e))
             report["sources"].append(item)
         if args.instagram: instagram(tmp,report)
-        report["owner_export_routes"]={"youtube":"YouTube Studio or Google Takeout","tiktok":"Save own video in TikTok app","status":"INPUT_REQUIRED"}
+        report["owner_export_routes"]={"youtube":"YouTube Studio or Google Takeout","tiktok":"Save own video in TikTok app","status":"FRAMES_READY_FOR_REVIEW" if any(x.get("platform")=="owner_export" and x.get("status")=="FRAMES_READY_FOR_REVIEW" for x in report["sources"]) else "INPUT_REQUIRED"}
     (OUT/"manifest.json").write_text(json.dumps(report,ensure_ascii=False,indent=2))
-    print(json.dumps({"smoke":report["smoke_test"],"sources":[{"id":s.get("id",s.get("platform")),"status":s["status"],"error":s.get("error")} for s in report["sources"]]},ensure_ascii=False))
+    print(json.dumps({"smoke":report["smoke_test"],"owner_export_test":report.get("owner_export_pipeline_test"),"sources":[{"id":s.get("id",s.get("platform")),"status":s["status"],"error":s.get("error")} for s in report["sources"]]},ensure_ascii=False))
 if __name__=="__main__":
     main()
