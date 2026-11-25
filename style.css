@@ -1741,7 +1741,7 @@ button {
 
     inset: 0;
 
-    background-image: url("images/performance.jpg");
+    background-image: url("images/image.jpg");
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
@@ -3421,3 +3421,12 @@ main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
 }
 .gallery-grid .gallery-item:has(.gallery-film) figcaption{min-height:36px;box-sizing:border-box;display:flex;align-items:center;line-height:1.45}
 @media(max-width:600px){.gallery-grid .gallery-item:has(.gallery-film) figcaption{padding:6px 8px;font-size:10px;min-height:36px}}
+
+/* Documentary-first policy: booking cards describe services, not invented event records. */
+.works-grid .work-item{border-top:2px solid rgba(184,154,91,.45)}
+.works-grid .work-info{padding:clamp(22px,3vw,40px)}
+.performance-background{background-position:center 58%}
+.performance-overlay{background:linear-gradient(90deg,rgba(10,15,10,.95),rgba(10,15,10,.73) 42%,rgba(10,15,10,.25) 100%)}
+.gallery-grid .gallery-item:nth-child(5) img{object-fit:contain;background:#101510}
+.music-art-label{position:absolute;bottom:12px;right:12px;padding:4px 8px;background:rgba(10,15,10,.85);color:#eee9dc;font-size:11px;line-height:1.4}
+@media(max-width:600px){.performance-background{background-position:60% center}.performance-overlay{background:rgba(10,15,10,.72)}}
