@@ -3378,3 +3378,7 @@ object-fit:contain;
  .gallery-grid .gallery-item:nth-child(1),.gallery-grid .gallery-item:nth-child(6){grid-column:span 2;aspect-ratio:5/3}
 }
 @media(prefers-reduced-motion:reduce){.gallery-item img{transition:none}.gallery-item:hover img{transform:none}}
+
+/* Keep archival poster intact and anchor headings below fixed navigation. */
+#gallery{scroll-margin-top:100px}
+.gallery-grid .gallery-item:nth-child(6) img{object-fit:contain;background:#101510}
