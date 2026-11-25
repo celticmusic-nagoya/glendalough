@@ -3430,3 +3430,13 @@ main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
 .gallery-grid .gallery-item:nth-child(5) img{object-fit:contain;background:#101510}
 .music-art-label{position:absolute;bottom:12px;right:12px;padding:4px 8px;background:rgba(10,15,10,.85);color:#eee9dc;font-size:11px;line-height:1.4}
 @media(max-width:600px){.performance-background{background-position:60% center}.performance-overlay{background:rgba(10,15,10,.72)}}
+
+/* Mobile documentary photograph: show the full ensemble, then the booking copy. */
+@media(max-width:600px){
+ .performance-section{display:flex;flex-direction:column;align-items:stretch;min-height:0;padding:0 0 72px;background:#101510}
+ .performance-background{position:relative;inset:auto;width:100%;aspect-ratio:4/3;background-size:contain;background-position:center;background-color:#101510;flex:none}
+ .performance-overlay{display:none}
+ .performance-container{padding-top:32px}
+ .performance-content h2{font-size:clamp(30px,9vw,42px);line-height:1.15;letter-spacing:.035em}
+ .performance-content .button{min-height:44px}
+}
