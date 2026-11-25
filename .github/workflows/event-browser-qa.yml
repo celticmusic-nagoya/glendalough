@@ -71,7 +71,12 @@ jobs:
                 assert.equal(visual.captions.length,6);
                 assert(visual.captions.every(i=>i.visible&&i.fit),'Gallery caption clipping');
                 assert.equal(visual.brokenLocal.length,0,JSON.stringify(visual.brokenLocal));
-                await page.locator('#gallery').scrollIntoViewIfNeeded();
+                await page.evaluate(()=>{document.activeElement.blur();document.querySelector('#gallery').scrollIntoView({block:'start',behavior:'instant'})});
+                const anchorFit=await page.evaluate(()=>({sectionTop:document.querySelector('#gallery').getBoundingClientRect().top,headerBottom:document.querySelector('.header').getBoundingClientRect().bottom,skipOpacity:getComputedStyle(document.querySelector('.skip-link')).opacity}));
+                assert(anchorFit.sectionTop>=anchorFit.headerBottom-1,JSON.stringify(anchorFit));
+                assert.equal(anchorFit.skipOpacity,'0');
+                await page.screenshot({path:'screenshots/gallery-anchor-'+width+'.png'});
+
                 await page.locator('#gallery').screenshot({path:'screenshots/gallery-'+width+'.png'});
                 await page.screenshot({path:'screenshots/home-'+width+'.png',fullPage:true});
                 const metrics=await page.evaluate(()=>{const n=performance.getEntriesByType('navigation')[0];return {domContentLoadedMs:n.domContentLoadedEventEnd,resources:performance.getEntriesByType('resource').map(r=>({url:r.name,transferBytes:r.transferSize,durationMs:r.duration})),images:[...document.images].map(i=>({src:i.getAttribute('src'),loading:i.loading}))}});
