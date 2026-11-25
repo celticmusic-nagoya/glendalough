@@ -3387,3 +3387,10 @@ object-fit:contain;
 .gallery-grid figcaption{position:absolute;inset:auto 0 0;padding:10px 12px;background:rgba(10,16,12,.94);color:#e9e3d4;font-size:10px;line-height:1.5;letter-spacing:.09em}
 .gallery-grid .gallery-item:has(figcaption) img{height:calc(100% - 36px)}
 @media(max-width:600px){.gallery-grid figcaption{font-size:9px;letter-spacing:0}}
+
+/* Brand legibility: retain original wordmark, strengthen its surrounding contrast. */
+.header{background:linear-gradient(180deg,rgba(9,14,10,.98),rgba(9,14,10,.78) 65%,rgba(9,14,10,0))}
+.header.scrolled{background:rgba(12,18,13,.97)}
+.logo-image{height:46px;width:auto;object-fit:contain}
+@media(max-width:900px){.logo-image{height:40px;max-width:calc(100vw - 104px)}}
+@media(max-width:600px){.logo-image{height:38px}}
