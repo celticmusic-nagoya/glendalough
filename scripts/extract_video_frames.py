@@ -1,5 +1,8 @@
 """Review authorized official video footage. Never publish or bypass access controls."""
-import hashlib, json, math, os, subprocess, tempfile
+import hashlib, json, math, os, subprocess, tempfile, argparse, re
+from urllib.request import Request, urlopen, HTTPRedirectHandler, build_opener
+from urllib.parse import urlencode, urlsplit
+from urllib.error import HTTPError, URLError
 from pathlib import Path
 from PIL import Image, ImageOps, ImageEnhance, ImageDraw, ImageFilter, ImageStat
 
@@ -60,29 +63,96 @@ def report_frames(frames,step,folder):
         draw.text((x+6,y+199),f'{p.name} ~{rec["nominal_second"]}s',fill="white")
     sheet.save(folder/"contact-sheet.jpg",quality=88)
     return rows
-report={"ffmpeg":version(["ffmpeg","-version"]),"ffprobe":version(["ffprobe","-version"]),"yt_dlp":version(["yt-dlp","--version"]),"sources":[]}
-with tempfile.TemporaryDirectory() as tmp:
-    tmp=Path(tmp)
-    fixture=tmp/"smoke.mp4"
-    run(["ffmpeg","-nostdin","-v","error","-f","lavfi","-i","testsrc2=size=640x360:rate=25","-t","3","-c:v","mpeg4",str(fixture)])
-    frames,step,duration=extract(fixture,tmp/"smoke-frames")
-    assert len(frames)==3
-    report["smoke_test"]={"status":"PASS","frames":len(frames),"synthetic_test_only":True}
-    # Restrict scope to the existing authorized official video links.
-    for key,url in SOURCES:
-        item={"id":key,"url":url,"location_verified":False}
-        try:
-            folder=tmp/key;folder.mkdir()
-            run(["yt-dlp","--ignore-config","--no-playlist","--no-progress","--no-warnings","--socket-timeout","12","--retries","0","--fragment-retries","0","--max-filesize","80M","--match-filters","duration <= 300","-f","best[height<=1080]/bestvideo[height<=1080]","-o",str(folder/"source.%(ext)s"),url],65)
-            files=[p for p in folder.glob("source.*") if p.suffix not in {".part",".ytdl",".json"}]
-            assert len(files)==1,"Video unavailable or exceeds acquisition limits"
-            source=files[0]
-            assert source.stat().st_size<=80*1024*1024
-            dest=OUT/key
-            frames,step,duration=extract(source,dest)
-            item.update(status="FRAMES_READY_FOR_REVIEW",source_sha256=sha(source),duration=duration,interval_seconds=step,frames=report_frames(frames,step,dest))
-        except (subprocess.CalledProcessError,subprocess.TimeoutExpired,AssertionError,ValueError,OSError) as e:
-            item.update(status="ACQUISITION_OR_EXTRACTION_BLOCKED",error=(getattr(e,"stderr",None) or str(e))[-1500:])
-        report["sources"].append(item)
-        (OUT/"manifest.json").write_text(json.dumps(report,ensure_ascii=False,indent=2))
-    print(json.dumps({"smoke":report["smoke_test"],"sources":[{"id":s["id"],"status":s["status"]} for s in report["sources"]]},ensure_ascii=False))
+
+# Official Instagram Login API; never log token, signed CDN URLs or raw errors.
+def graph(path, params, token):
+    url="https://graph.instagram.com/v27.0/"+path+"?"+urlencode(params)
+    req=Request(url,headers={"Authorization":"Bearer "+token})
+    with urlopen(req,timeout=20) as response:
+        return json.load(response)
+def cdn_allowed(url):
+    u=urlsplit(url)
+    return u.scheme=="https" and u.port in (None,443) and not u.username and not u.password and any(u.hostname==d or (u.hostname or "").endswith("."+d) for d in ("cdninstagram.com","fbcdn.net"))
+class SafeCDNRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not cdn_allowed(newurl): raise ValueError("Unexpected CDN redirect")
+        return super().redirect_request(req,fp,code,msg,headers,newurl)
+def download_media(url,dest):
+    if not cdn_allowed(url): raise ValueError("Unexpected media host")
+    opener=build_opener(SafeCDNRedirect())
+    with opener.open(Request(url),timeout=25) as response,dest.open("wb") as fp:
+        if not cdn_allowed(response.geturl()): raise ValueError("Unexpected media host")
+        n=0
+        while True:
+            chunk=response.read(1024*1024)
+            if not chunk: break
+            n+=len(chunk)
+            if n>80*1024*1024: raise ValueError("Video exceeds 80 MiB")
+            fp.write(chunk)
+    if not n: raise ValueError("Empty media")
+def process(source,key,metadata,report):
+    dest=OUT/key
+    frames,step,duration=extract(source,dest)
+    return dict(metadata,status="FRAMES_READY_FOR_REVIEW",source_sha256=sha(source),duration=duration,interval_seconds=step,frames=report_frames(frames,step,dest))
+def safe_error(e):
+    # Do not leak credentials, signed media URLs, local paths or raw API responses.
+    if isinstance(e,HTTPError): return "HTTP "+str(e.code)
+    if isinstance(e,subprocess.CalledProcessError): return "FFmpeg/FFprobe failed: exit "+str(e.returncode)
+    return type(e).__name__
+def instagram(tmp,report):
+    token=os.environ.get("INSTAGRAM_ACCESS_TOKEN","").strip()
+    if not token:
+        report["sources"].append({"platform":"instagram","status":"AUTH_NOT_CONFIGURED"})
+        return
+    try:
+        profile=graph("me",{"fields":"user_id,username"},token)
+        if profile.get("username","").lower()!="glendalough_nagoya":
+            report["sources"].append({"platform":"instagram","status":"ACCOUNT_MISMATCH"})
+            return
+        uid=str(profile["user_id"])
+        if not re.fullmatch(r"[0-9]+",uid): raise ValueError("Invalid account id")
+        data=graph(uid+"/media",{"fields":"id,media_type,media_url,permalink,timestamp","limit":25},token)
+        videos=[m for m in data.get("data",[]) if m.get("media_type")=="VIDEO" and m.get("media_url") and re.fullmatch(r"[0-9]+",str(m.get("id","")))]
+        targets={"Dbzb1vHzqWn","DYT5gg_TQML"}
+        videos.sort(key=lambda m:not any(x in m.get("permalink","") for x in targets))
+        report["instagram_video_count_first_page"]=len(videos)
+        for m in videos[:5]:
+            key="instagram-"+str(m["id"])
+            item={"platform":"instagram","id":key,"url":m.get("permalink"),"timestamp":m.get("timestamp"),"source_type":"official_authenticated_media","location_verified":False}
+            try:
+                source=tmp/(key+".mp4")
+                download_media(m["media_url"],source)
+                item=process(source,key,item,report)
+            except (HTTPError,URLError,ValueError,OSError,AssertionError,subprocess.SubprocessError) as e:
+                item.update(status="MEDIA_BLOCKED",error=safe_error(e))
+            report["sources"].append(item)
+        if not videos: report["sources"].append({"platform":"instagram","status":"NO_VIDEO_ON_FIRST_PAGE"})
+    except (HTTPError,URLError,ValueError,KeyError,OSError) as e:
+        report["sources"].append({"platform":"instagram","status":"API_BLOCKED","error":safe_error(e)})
+def main():
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--local",type=Path,nargs="*",default=[])
+    parser.add_argument("--instagram",action="store_true")
+    args=parser.parse_args()
+    report={"ffmpeg":version(["ffmpeg","-version"]),"ffprobe":version(["ffprobe","-version"]),"sources":[]}
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp=Path(tmp)
+        fixture=tmp/"smoke.mp4"
+        run(["ffmpeg","-nostdin","-v","error","-f","lavfi","-i","testsrc2=size=640x360:rate=25","-t","3","-c:v","mpeg4",str(fixture)])
+        frames,step,duration=extract(fixture,tmp/"smoke-frames")
+        assert len(frames)==3
+        report["smoke_test"]={"status":"PASS","frames":len(frames),"synthetic_test_only":True}
+        for i,source in enumerate(args.local):
+            item={"platform":"owner_export","id":f"local-{i+1:02d}","source_type":"owner_supplied_video","location_verified":False}
+            try:
+                if not source.is_file(): raise ValueError("Missing input")
+                item=process(source,item["id"],item,report)
+            except (ValueError,OSError,AssertionError,subprocess.SubprocessError) as e:
+                item.update(status="EXTRACTION_BLOCKED",error=safe_error(e))
+            report["sources"].append(item)
+        if args.instagram: instagram(tmp,report)
+        report["owner_export_routes"]={"youtube":"YouTube Studio or Google Takeout","tiktok":"Save own video in TikTok app","status":"INPUT_REQUIRED"}
+    (OUT/"manifest.json").write_text(json.dumps(report,ensure_ascii=False,indent=2))
+    print(json.dumps({"smoke":report["smoke_test"],"sources":[{"id":s.get("id",s.get("platform")),"status":s["status"],"error":s.get("error")} for s in report["sources"]]},ensure_ascii=False))
+if __name__=="__main__":
+    main()
