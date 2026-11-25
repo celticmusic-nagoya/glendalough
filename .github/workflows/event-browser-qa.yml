@@ -32,6 +32,8 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: |
           mkdir -p /tmp/site/glendalough screenshots
+          git ls-files images > screenshots/image-inventory.txt
+          cat screenshots/image-inventory.txt
           cp -a index.html style.css events en images sitemap.xml /tmp/site/glendalough/
           mkdir -p /tmp/site/baseline
           cp -a baseline/index.html baseline/style.css baseline/events baseline/en baseline/images baseline/sitemap.xml /tmp/site/baseline/
@@ -60,7 +62,7 @@ jobs:
                 assert.equal(optimized.length,4);
                 assert(optimized.every(i=>i.width>0 && i.src.endsWith('.webp')));
                 const gallery=await page.evaluate(async()=>{const imgs=[...document.querySelectorAll('#gallery img')];return Promise.all(imgs.map(async i=>{i.loading='eager';try{await i.decode()}catch{}return {src:i.getAttribute('src'),width:i.naturalWidth}}))});
-                assert.equal(gallery.length,6); assert(gallery.every(i=>i.width>0),JSON.stringify(gallery));
+                assert.equal(gallery.length,6); require('node:fs').writeFileSync('screenshots/gallery-decode-'+width+'.json',JSON.stringify(gallery,null,2)); assert(gallery.every(i=>i.width>0),JSON.stringify(gallery));
                 await page.evaluate(async()=>{for(const i of document.images)i.loading='eager';await Promise.allSettled([...document.images].map(i=>i.decode()));});
                 await page.locator('#gallery').scrollIntoViewIfNeeded();
                 await page.locator('#gallery').screenshot({path:'screenshots/gallery-'+width+'.png'});
