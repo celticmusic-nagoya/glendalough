@@ -83,7 +83,7 @@ jobs:
           (async()=>{
             const browser=await chromium.launch();
             try {
-              for(const width of [320,390,768,1440]){
+              for(const width of [320,390,768,1280,1440,1650,1920]){
                 const page=await browser.newPage({viewport:{width,height:900}});
                 await page.goto('http://127.0.0.1:8765/glendalough/',{waitUntil:'domcontentloaded'});
                 await page.addStyleTag({content:'.reveal{opacity:1!important;transform:none!important}'});
@@ -94,6 +94,12 @@ jobs:
                 await baseline.goto('http://127.0.0.1:8765/baseline/',{waitUntil:'domcontentloaded'});
                 await baseline.evaluate(()=>document.fonts.ready);
                 await baseline.screenshot({path:'screenshots/baseline-hero-'+width+'.png'});
+                if([1440,1650].includes(width)){
+                  await baseline.addStyleTag({content:'.reveal{opacity:1!important;transform:none!important}'});
+                  await baseline.evaluate(async()=>{for(const i of document.querySelectorAll('#about img,#music .music-card-image img')){i.loading='eager';await i.decode()}});
+                  await baseline.locator('#about .about-grid').screenshot({path:'screenshots/before-about-'+width+'.png'});
+                  await baseline.locator('#music .music-card-grid').first().screenshot({path:'screenshots/before-music-'+width+'.png'});
+                }
                 await baseline.close();
                 const overflow=await page.evaluate(()=>({viewport:innerWidth,document:document.documentElement.scrollWidth,offenders:[...document.querySelectorAll('body *')].map(e=>({tag:e.tagName,cls:String(e.className),right:e.getBoundingClientRect().right,left:e.getBoundingClientRect().left,width:e.scrollWidth})).filter(e=>e.right>innerWidth+1||e.left< -1).slice(0,60)})); require('node:fs').writeFileSync('screenshots/overflow-'+width+'.json',JSON.stringify(overflow,null,2)); console.log('OVERFLOW',JSON.stringify(overflow)); assert(overflow.document<=width,'Home horizontal overflow at '+width);
                 assert.equal(await page.locator('#event').getAttribute('required'),null);
@@ -103,6 +109,25 @@ jobs:
                 const gallery=await page.evaluate(async()=>{const imgs=[...document.querySelectorAll('#gallery img')];return Promise.all(imgs.map(async i=>{i.loading='eager';try{await i.decode()}catch{}return {src:i.getAttribute('src'),width:i.naturalWidth}}))});
                 assert.equal(gallery.length,6); require('node:fs').writeFileSync('screenshots/gallery-decode-'+width+'.json',JSON.stringify(gallery,null,2)); assert(gallery.every(i=>i.width>0),JSON.stringify(gallery));
                 await page.evaluate(async()=>{for(const i of document.images)i.loading='eager';await Promise.allSettled([...document.images].map(i=>i.decode()));});
+                const composition=await page.evaluate(()=>{
+                  const images=[...document.querySelectorAll('#about .about-image img,#music .music-card-image img')];
+                  return images.map(i=>{
+                    const r=i.getBoundingClientRect(),p=i.parentElement.getBoundingClientRect(),cs=getComputedStyle(i);
+                    const natural=i.naturalWidth/i.naturalHeight,display=r.width/r.height;
+                    return {src:i.getAttribute('src'),natural,display,width:r.width,height:r.height,fit:cs.objectFit,transform:cs.transform,ratioError:Math.abs(display/natural-1),withinParent:r.left>=p.left-1&&r.right<=p.right+1&&r.top>=p.top-1&&r.bottom<=p.bottom+1};
+                  });
+                });
+                assert.equal(composition.length,7);
+                assert(composition.every(x=>x.width>0&&x.height>0&&x.fit==='contain'&&x.transform==='none'&&x.ratioError<0.012&&x.withinParent),JSON.stringify(composition));
+                for(const card of await page.locator('#music .music-card').all()){
+                  await card.hover();
+                  assert.equal(await card.locator('img').evaluate(i=>getComputedStyle(i).transform),'none','Image clipped on hover');
+                }
+                await page.mouse.move(0,0);
+                require('node:fs').writeFileSync('screenshots/composition-'+width+'.json',JSON.stringify(composition,null,2));
+                await page.locator('#about .about-grid').screenshot({path:'screenshots/about-'+width+'.png'});
+                await page.locator('#music .music-card-grid').first().screenshot({path:'screenshots/music-ireland-'+width+'.png'});
+                await page.locator('#music .music-card-grid').last().screenshot({path:'screenshots/music-beyond-'+width+'.png'});
                 const visual=await page.evaluate(()=>({logo:[...document.querySelectorAll('.header .logo-image')].map(e=>({loaded:e.naturalWidth>0,height:e.getBoundingClientRect().height,width:e.getBoundingClientRect().width})),captions:[...document.querySelectorAll('#gallery figcaption')].map(e=>({text:e.textContent,visible:e.getBoundingClientRect().height>0,fit:e.scrollWidth<=e.clientWidth&&e.scrollHeight<=e.clientHeight})),brokenLocal:[...document.images].filter(i=>new URL(i.src).origin===location.origin&&!i.naturalWidth).map(i=>i.src)}));
                 require('node:fs').writeFileSync('screenshots/visual-contract-'+width+'.json',JSON.stringify(visual,null,2));
                 assert(visual.logo.length>0 && visual.logo.every(i=>i.loaded&&i.height>=32&&i.width>0),'Logo visibility');

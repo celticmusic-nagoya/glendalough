@@ -3458,3 +3458,35 @@ main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
  .gallery-grid .gallery-item:nth-child(6){grid-column:span 1;aspect-ratio:4/5}
 }
 .gallery-grid figcaption{overflow-wrap:anywhere}
+
+/* Composition-first editorial layout: complete photographs and music artwork. */
+#about .about-grid{align-items:center;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,5vw,88px)}
+#about .about-text{min-width:0;padding-left:0}
+#about .about-image{min-width:0;margin:0;width:100%;max-width:none}
+#about .about-image img{display:block;width:100%;height:auto;aspect-ratio:auto;object-fit:contain;object-position:center;transform:none}
+#about .image-caption{position:relative;inset:auto;display:table;margin:14px 0 0 auto;padding:10px 0 8px 24px;background:transparent;color:var(--editorial-gold);border-top:1px solid rgba(196,173,120,.45);text-align:right;max-width:100%;letter-spacing:.17em}
+#music .music-card-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(18px,2.3vw,34px);align-items:start}
+#music .music-card{min-width:0;margin-top:0}
+#music .music-card:nth-child(n){margin-top:0}
+#music .music-card-image{height:auto;aspect-ratio:auto;background:transparent;overflow:hidden}
+#music .music-card-image img{display:block;width:100%;height:auto;aspect-ratio:auto;object-fit:contain;object-position:center;transform:none;transition:none}
+#music .music-card:hover .music-card-image img{transform:none}
+#music .music-card:hover{transform:none}
+#music .music-card-overlay{pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.14),transparent 30%,transparent 75%,rgba(0,0,0,.19))}
+#music .music-card-number{top:12px;left:12px;text-shadow:0 1px 6px #101510}
+#music .music-card-content{padding:22px 2px 28px}
+#music .music-card-content h4{line-height:1.5;min-height:3em}
+#gallery .gallery-grid .gallery-item img{object-fit:contain;object-position:center;transform:none;transition:none;background:#101510}
+#gallery .gallery-grid .gallery-item:hover img{transform:none}
+@media(max-width:900px){
+ #about .about-grid{grid-template-columns:minmax(0,1fr);gap:36px}
+ #about .about-image{max-width:760px;margin-inline:auto}
+ #music .music-card-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+}
+@media(max-width:600px){
+ #about .about-grid{gap:28px}
+ #about .image-caption{font-size:9px;margin-top:10px;padding:8px 0 4px 16px}
+ #music .music-card-grid{grid-template-columns:minmax(0,1fr);gap:28px}
+ #music .music-card-content h4{min-height:0}
+ #music .music-card-content{padding:18px 2px 24px}
+}
