@@ -80,6 +80,7 @@
   <link rel="icon" href="images/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 
+  <noscript><style>.reveal,.hero-reveal{opacity:1!important;transform:none!important;animation:none!important}</style></noscript>
 </head>
 <body>
   <a class="skip-link" href="#main-content">本文へ移動</a>
@@ -565,7 +566,8 @@
         </div>
 
         <div class="contact-form-wrapper reveal">
-          <form class="contact-form" action="https://formspree.io/f/xkjwpwlo" method="POST">
+          <form class="contact-form" action="https://formspree.io/f/xkjwpwlo" method="POST" aria-label="出演依頼・お問い合わせ" aria-describedby="contact-form-hint">
+            <p id="contact-form-hint" class="form-hint">必須の項目をご入力ください。開催日・会場・ご予算が未定の場合は、空欄のままでご相談いただけます。</p>
             <div class="form-group">
               <label for="name">お名前 <span>必須</span></label>
               <input type="text" id="name" name="name" placeholder="山田 太郎" autocomplete="name" required>
@@ -633,7 +635,7 @@
               </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group form-group-wide">
               <label for="message">お問い合わせ内容 <span>必須</span></label>
               <textarea id="message" name="message" rows="7" placeholder="イベントの概要、演奏時間、その他ご希望などをご記入ください。" required></textarea>
             </div>

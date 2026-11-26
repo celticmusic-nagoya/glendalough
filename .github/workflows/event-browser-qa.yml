@@ -127,6 +127,9 @@ jobs:
                   await baseline.addStyleTag({content:'.reveal{opacity:1!important;transform:none!important}'});
                   await baseline.locator('.sns-section').screenshot({path:'screenshots/before-social-'+width+'.png'});
                 }
+                await baseline.evaluate(async()=>{for(const i of document.images){i.loading='eager'}await Promise.allSettled([...document.images].map(i=>i.decode()));});
+                const baseRhythm=await baseline.evaluate(()=>({height:document.documentElement.scrollHeight,sections:[...document.querySelectorAll('main>section[id]')].map(s=>({id:s.id,height:s.offsetHeight}))}));
+                if([390,1650].includes(width)){await baseline.locator('#contact .contact-form').screenshot({path:'screenshots/before-contact-'+width+'.png'});}
                 await baseline.close();
                 const overflow=await page.evaluate(()=>({viewport:innerWidth,document:document.documentElement.scrollWidth,offenders:[...document.querySelectorAll('body *')].map(e=>({tag:e.tagName,cls:String(e.className),right:e.getBoundingClientRect().right,left:e.getBoundingClientRect().left,width:e.scrollWidth})).filter(e=>e.right>innerWidth+1||e.left< -1).slice(0,60)})); require('node:fs').writeFileSync('screenshots/overflow-'+width+'.json',JSON.stringify(overflow,null,2)); console.log('OVERFLOW',JSON.stringify(overflow)); assert(overflow.document<=width,'Home horizontal overflow at '+width);
                 assert.equal(await page.locator('#event').getAttribute('required'),null);
@@ -241,6 +244,27 @@ jobs:
                 await page.locator('#performance').screenshot({path:'screenshots/performance-section-'+width+'.png'});
                 await page.locator('#works').screenshot({path:'screenshots/works-'+width+'.png'});
 
+                const rhythm=await page.evaluate(()=>{
+                  const form=document.querySelector('#contact form');
+                  const fields=[...form.querySelectorAll('input,select,textarea')].map(e=>({name:e.name,required:e.required,label:!!e.labels?.length,height:e.getBoundingClientRect().height,fit:e.scrollWidth<=e.clientWidth+2||e.tagName==='SELECT'}));
+                  return {height:document.documentElement.scrollHeight,sections:[...document.querySelectorAll('main>section[id]')].map(s=>({id:s.id,height:s.offsetHeight})),columns:getComputedStyle(form).gridTemplateColumns,fields,action:form.action,valid:form.checkValidity()};
+                });
+                assert(rhythm.height<baseRhythm.height,'Page grew: '+JSON.stringify({baseline:baseRhythm.height,current:rhythm.height}));
+                assert.equal(rhythm.action,'https://formspree.io/f/xkjwpwlo');
+                assert.deepEqual(rhythm.fields.map(f=>f.name),['name','email','organization','event','date','venue','event-type','formation','budget','message']);
+                assert.deepEqual(rhythm.fields.filter(f=>f.required).map(f=>f.name),['name','email','event-type','message']);
+                assert(rhythm.fields.every(f=>f.label&&f.height>=44));
+                assert.equal(rhythm.valid,false);
+                assert.equal(rhythm.columns.trim().split(/\s+/).length,width<=600?1:2);
+                await page.locator('#name').fill('QA only');
+                await page.locator('#email').fill('qa@example.invalid');
+                await page.locator('#event-type').selectOption('market');
+                await page.locator('#message').fill('QA fixture, do not send');
+                assert(await page.locator('.contact-form').evaluate(f=>f.checkValidity()));
+                for(const id of ['name','email','message']) await page.locator('#'+id).fill('');
+                await page.locator('#event-type').selectOption('');
+                require('node:fs').writeFileSync('screenshots/rhythm-'+width+'.json',JSON.stringify({baseline:baseRhythm,current:rhythm},null,2));
+                await page.locator('#contact .contact-form').screenshot({path:'screenshots/contact-'+width+'.png'});
                 await page.screenshot({path:'screenshots/home-'+width+'.png',fullPage:true});
                 const metrics=await page.evaluate(()=>{const n=performance.getEntriesByType('navigation')[0];return {domContentLoadedMs:n.domContentLoadedEventEnd,resources:performance.getEntriesByType('resource').map(r=>({url:r.name,transferBytes:r.transferSize,durationMs:r.duration})),images:[...document.images].map(i=>({src:i.getAttribute('src'),loading:i.loading}))}});
                 require('node:fs').writeFileSync('screenshots/performance-'+width+'.json',JSON.stringify(metrics,null,2));
