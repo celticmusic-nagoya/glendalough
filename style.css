@@ -3564,3 +3564,11 @@ main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
 .past-event-with-video{display:flex;flex-direction:column;align-items:stretch}
 .past-event-with-video .past-film-link{margin-top:auto;padding-top:16px}
 @media(prefers-reduced-motion:reduce){.film-poster img{transition:none}}
+
+/* Hidden navigation cannot paint over content or enter the tab order. */
+.mobile-nav:not(.active){visibility:hidden;pointer-events:none}
+@media(max-width:900px){
+ .mobile-nav{max-height:calc(100dvh - var(--header-height));overflow-y:auto;overscroll-behavior:contain;transform:none;transition:none}
+ .mobile-nav.active{visibility:visible;pointer-events:auto;transform:none}
+}
+@media(max-width:600px){.film-stage{aspect-ratio:4/3}.music-film-card:last-child .film-stage{aspect-ratio:16/9}.film-stage:has(iframe){aspect-ratio:4/5}}

@@ -110,7 +110,7 @@
       </button>
     </div>
 
-    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
+    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation" inert aria-hidden="true">
       <a href="#about">ABOUT</a>
       <a href="#music">MUSIC</a>
       <a href="#live">LIVE</a>
@@ -691,6 +691,8 @@
       const closeMenu = () => {
         menuButton.classList.remove('active');
         mobileNav.classList.remove('active');
+        mobileNav.inert = true;
+        mobileNav.setAttribute('aria-hidden', 'true');
         menuButton.setAttribute('aria-expanded', 'false');
         menuButton.setAttribute('aria-label', 'メニューを開く');
         body.classList.remove('menu-open');
@@ -710,6 +712,8 @@
         const open = !menuButton.classList.contains('active');
         menuButton.classList.toggle('active', open);
         mobileNav.classList.toggle('active', open);
+        mobileNav.inert = !open;
+        mobileNav.setAttribute('aria-hidden', String(!open));
         menuButton.setAttribute('aria-expanded', String(open));
         menuButton.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
         body.classList.toggle('menu-open', open);
@@ -722,8 +726,13 @@
 
       // Escキーでメニュー閉じる
       document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closeMenu();
+        if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+          closeMenu();
+          menuButton.focus();
+        }
       });
+
+      window.matchMedia('(min-width: 901px)').addEventListener('change', e => { if (e.matches) closeMenu(); });
 
       // ヘッダースクロール制御
       const updateHeader = () => {
