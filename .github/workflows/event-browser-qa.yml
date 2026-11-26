@@ -101,6 +101,10 @@ jobs:
                   await baseline.locator('#music .music-card-grid').first().screenshot({path:'screenshots/before-music-'+width+'.png'});
                   await baseline.locator('#performance').screenshot({path:'screenshots/before-performance-'+width+'.png'});
                 }
+                if([390,1440,1650].includes(width)){
+                  await baseline.addStyleTag({content:'.reveal{opacity:1!important;transform:none!important}'});
+                  await baseline.locator('.sns-section').screenshot({path:'screenshots/before-social-'+width+'.png'});
+                }
                 await baseline.close();
                 const overflow=await page.evaluate(()=>({viewport:innerWidth,document:document.documentElement.scrollWidth,offenders:[...document.querySelectorAll('body *')].map(e=>({tag:e.tagName,cls:String(e.className),right:e.getBoundingClientRect().right,left:e.getBoundingClientRect().left,width:e.scrollWidth})).filter(e=>e.right>innerWidth+1||e.left< -1).slice(0,60)})); require('node:fs').writeFileSync('screenshots/overflow-'+width+'.json',JSON.stringify(overflow,null,2)); console.log('OVERFLOW',JSON.stringify(overflow)); assert(overflow.document<=width,'Home horizontal overflow at '+width);
                 assert.equal(await page.locator('#event').getAttribute('required'),null);
@@ -158,6 +162,31 @@ jobs:
                 assert(documentary.background.includes('/images/image.jpg')&&documentary.backgroundWidth>0,'Performance documentary photo unavailable');
                 assert(documentary.genreLabels.every(x=>x.visible&&x.text==='音楽イメージ'));
                 require('node:fs').writeFileSync('screenshots/documentary-'+width+'.json',JSON.stringify(documentary,null,2));
+                const links=await page.evaluate(()=>{
+                  const social=[...document.querySelectorAll('#social .sns-links a')].map(a=>({href:a.href,height:a.getBoundingClientRect().height,fit:a.scrollWidth<=a.clientWidth+1}));
+                  const video=[...document.querySelectorAll('#music-video .film-source-link')].map(a=>a.href);
+                  const reels=[...document.querySelectorAll('#live .past-film-link')].map(a=>a.href);
+                  const anchors=[...document.querySelectorAll('a[href^="#"]')].filter(a=>a.getAttribute('href').length>1).map(a=>a.getAttribute('href')).filter(h=>!document.getElementById(h.slice(1)));
+                  return {social,video,reels,anchors,headline:document.querySelector('#sns-title').getBoundingClientRect().width};
+                });
+                assert.equal(links.social.length,4);
+                assert(links.social.every(a=>a.height>=44&&a.fit));
+                assert.deepEqual(links.video,['https://www.youtube.com/watch?v=-btG-2M4QXQ','https://www.youtube.com/watch?v=L26X01zSNgo','https://www.youtube.com/watch?v=9d2jLKTgQtk']);
+                assert.deepEqual(links.reels,['https://www.instagram.com/reel/Dbzb1vHzqWn/','https://www.instagram.com/reel/DYT5gg_TQML/']);
+                assert.equal(links.anchors.length,0,JSON.stringify(links.anchors));
+                assert.equal(await page.locator('#social .social-film-links').count(),0);
+                assert.equal(await page.locator('.hero-live-link[href="#live"]').count(),1);
+                assert.equal(await page.locator('.live-detail-links a').count(),2);
+                await page.locator('#social .editorial-text-link').click();
+                await page.waitForFunction(()=>location.hash==='#music-video');
+                if(await page.locator('#menuButton').isVisible()){
+                  await page.locator('#menuButton').click();
+                  assert.equal(await page.locator('#menuButton').getAttribute('aria-expanded'),'true');
+                  await page.keyboard.press('Escape');
+                  assert.equal(await page.locator('#menuButton').getAttribute('aria-expanded'),'false');
+                }
+                require('node:fs').writeFileSync('screenshots/navigation-'+width+'.json',JSON.stringify(links,null,2));
+                await page.locator('#social').screenshot({path:'screenshots/social-'+width+'.png'});
                 await page.locator('#performance').screenshot({path:'screenshots/performance-section-'+width+'.png'});
                 await page.locator('#works').screenshot({path:'screenshots/works-'+width+'.png'});
 

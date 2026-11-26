@@ -3509,3 +3509,44 @@ main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
  #performance .performance-content h2{font-size:clamp(30px,9vw,42px)}
  #performance .performance-photo figcaption{font-size:9px}
 }
+
+/* Editorial polish: one destination per task, legible typography and compact social navigation. */
+#social.sns-section{padding:clamp(64px,8vw,112px) 0}
+#social .sns-box{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);align-items:center;gap:clamp(28px,5vw,76px);padding:clamp(30px,5vw,72px)}
+#social .sns-intro{min-width:0}
+#social .sns-intro .section-label{margin:0 0 18px;color:var(--editorial-gold)}
+#social #sns-title{font-size:clamp(34px,4vw,60px);line-height:1.08;letter-spacing:.025em;overflow-wrap:normal}
+#social .sns-intro>p:not(.section-label){margin-top:22px;max-width:29em;font-size:clamp(13px,1vw,16px);line-height:1.9;color:#d1ccbd;word-break:normal;overflow-wrap:break-word;line-break:strict}
+.editorial-text-link{display:inline-flex;align-items:center;gap:20px;min-height:44px;color:var(--editorial-gold);border-bottom:1px solid rgba(196,173,120,.5);font-size:13px;text-decoration:none;line-height:1.6}
+.editorial-text-link:hover{color:#eee8d9;border-color:currentColor}
+#social .editorial-text-link{margin-top:16px}
+#social .sns-links a{min-width:0;min-height:64px;gap:18px;padding:14px 4px;transition:color .2s ease,background-color .2s ease}
+#social .sns-links a:hover{padding-left:4px;background:rgba(196,173,120,.045);color:var(--editorial-gold)}
+#social .sns-link-copy{display:flex;flex-direction:column;gap:3px;min-width:0;line-height:1.4}
+#social .sns-link-copy>span{font-size:clamp(16px,1.5vw,21px)}
+#social .sns-link-copy small{font-family:var(--serif);font-size:12px;letter-spacing:.035em;color:#b9b5a8}
+#social .sns-links strong{flex:none;color:var(--editorial-gold);font-size:19px}
+#music-video{scroll-margin-top:calc(var(--header-height) + 24px)}
+.music-video-content{align-items:flex-start}
+.music-film-card{flex:1 1 0;min-width:0;max-width:315px;width:100%}
+.music-film-card .youtube-short{width:100%;max-width:none;flex:none}
+.film-source-link,.past-film-link{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:10px 2px;font-size:12px;line-height:1.6;text-decoration:none;border-bottom:1px solid currentColor}
+.film-source-link{color:var(--editorial-gold)}
+.past-film-link{color:var(--text-dark)}
+.film-source-link:hover,.past-film-link:hover{text-decoration:underline;text-underline-offset:4px}
+.gallery-next{text-align:center;margin-top:28px}
+.hero-japanese{font-size:clamp(12px,1.2vw,16px);line-height:1.8;letter-spacing:.08em;margin-top:14px;color:#eee8d9}
+.hero-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px 28px;margin-top:30px}
+.hero .hero-actions .button{margin:0;min-width:0}
+.hero-live-link{display:inline-flex;align-items:center;gap:16px;min-height:44px;color:#eee8d9;font-size:13px;border-bottom:1px solid rgba(238,232,217,.65)}
+.hero-live-link:hover{color:var(--editorial-gold)}
+#about .about-text p:not(.lead){font-size:clamp(14px,1.02vw,16px);line-height:2.1;text-align:start;color:#d8d3c6}
+#music .music-card-content>p:not(.music-card-type){font-size:clamp(13px,.95vw,15px);line-height:1.95;color:#d2cdbf}
+.live-detail-links{display:grid;gap:0;margin:16px 0 22px;border-top:1px solid var(--border-dark)}
+.live-detail-links a{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:44px;padding:10px 0;border-bottom:1px solid var(--border-dark);font-size:13px;text-decoration:none}
+.live-detail-links a:hover{text-decoration:underline;text-underline-offset:4px}
+.footer-nav a,.back-to-top{min-height:44px;display:inline-flex;align-items:center}
+.footer-nav{gap:4px 24px}
+.back-to-top{gap:10px;font-family:var(--display);font-size:10px;letter-spacing:.12em;color:var(--editorial-gold)}
+@media(max-width:900px){#social .sns-box{grid-template-columns:minmax(0,1fr);gap:26px} .music-film-card{max-width:360px} .music-video-content{align-items:center}}
+@media(max-width:600px){#social.sns-section{padding:64px 0}#social .sns-box{padding:26px 20px;gap:24px}#social #sns-title{font-size:clamp(30px,8.5vw,42px)}#social .sns-links a{min-height:60px}.hero-actions{gap:8px 16px;margin-top:24px}.hero .hero-actions .button{min-width:0;padding-inline:18px}.hero-japanese{letter-spacing:.035em}.footer-nav{gap:2px 20px}}
