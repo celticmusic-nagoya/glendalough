@@ -3490,3 +3490,22 @@ main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
  #music .music-card-content h4{min-height:0}
  #music .music-card-content{padding:18px 2px 24px}
 }
+
+/* Booking: the ensemble photograph is documentary content, not a cropped backdrop. */
+#performance.performance-section{display:block;min-height:0;overflow:visible;padding:clamp(88px,10vw,150px) 0;background:linear-gradient(115deg,#101510,#172219)}
+#performance .performance-container{display:grid;grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);align-items:center;gap:clamp(32px,5vw,80px);padding:0}
+#performance .performance-content{min-width:0;max-width:none}
+#performance .performance-content h2{font-size:clamp(38px,4.3vw,66px);line-height:1.08;letter-spacing:.025em}
+#performance .performance-lead{font-size:clamp(19px,2vw,25px)}
+#performance .performance-photo{min-width:0;margin:0}
+#performance .performance-photo img{display:block;width:100%;height:auto;aspect-ratio:auto;object-fit:contain;object-position:center;transform:none}
+#performance .performance-photo figcaption{margin:14px 0 0 auto;padding:10px 0 0 24px;border-top:1px solid rgba(196,173,120,.45);width:fit-content;max-width:100%;font-family:var(--editorial);font-size:11px;letter-spacing:.14em;color:var(--editorial-gold);text-align:right}
+@media(max-width:900px){
+ #performance .performance-container{grid-template-columns:minmax(0,1fr);gap:34px}
+ #performance .performance-photo{grid-row:1;max-width:760px;margin-inline:auto;width:100%}
+}
+@media(max-width:600px){
+ #performance.performance-section{padding:76px 0}
+ #performance .performance-content h2{font-size:clamp(30px,9vw,42px)}
+ #performance .performance-photo figcaption{font-size:9px}
+}

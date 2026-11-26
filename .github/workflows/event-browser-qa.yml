@@ -96,9 +96,10 @@ jobs:
                 await baseline.screenshot({path:'screenshots/baseline-hero-'+width+'.png'});
                 if([1440,1650].includes(width)){
                   await baseline.addStyleTag({content:'.reveal{opacity:1!important;transform:none!important}'});
-                  await baseline.evaluate(async()=>{for(const i of document.querySelectorAll('#about img,#music .music-card-image img')){i.loading='eager';await i.decode()}});
+                  await baseline.evaluate(async()=>{for(const i of document.querySelectorAll('#about img,#music .music-card-image img,#performance .performance-photo img')){i.loading='eager';await i.decode()}});
                   await baseline.locator('#about .about-grid').screenshot({path:'screenshots/before-about-'+width+'.png'});
                   await baseline.locator('#music .music-card-grid').first().screenshot({path:'screenshots/before-music-'+width+'.png'});
+                  await baseline.locator('#performance').screenshot({path:'screenshots/before-performance-'+width+'.png'});
                 }
                 await baseline.close();
                 const overflow=await page.evaluate(()=>({viewport:innerWidth,document:document.documentElement.scrollWidth,offenders:[...document.querySelectorAll('body *')].map(e=>({tag:e.tagName,cls:String(e.className),right:e.getBoundingClientRect().right,left:e.getBoundingClientRect().left,width:e.scrollWidth})).filter(e=>e.right>innerWidth+1||e.left< -1).slice(0,60)})); require('node:fs').writeFileSync('screenshots/overflow-'+width+'.json',JSON.stringify(overflow,null,2)); console.log('OVERFLOW',JSON.stringify(overflow)); assert(overflow.document<=width,'Home horizontal overflow at '+width);
@@ -110,14 +111,14 @@ jobs:
                 assert.equal(gallery.length,6); require('node:fs').writeFileSync('screenshots/gallery-decode-'+width+'.json',JSON.stringify(gallery,null,2)); assert(gallery.every(i=>i.width>0),JSON.stringify(gallery));
                 await page.evaluate(async()=>{for(const i of document.images)i.loading='eager';await Promise.allSettled([...document.images].map(i=>i.decode()));});
                 const composition=await page.evaluate(()=>{
-                  const images=[...document.querySelectorAll('#about .about-image img,#music .music-card-image img')];
+                  const images=[...document.querySelectorAll('#about .about-image img,#music .music-card-image img,#performance .performance-photo img')];
                   return images.map(i=>{
                     const r=i.getBoundingClientRect(),p=i.parentElement.getBoundingClientRect(),cs=getComputedStyle(i);
                     const natural=i.naturalWidth/i.naturalHeight,display=r.width/r.height;
                     return {src:i.getAttribute('src'),natural,display,width:r.width,height:r.height,fit:cs.objectFit,transform:cs.transform,ratioError:Math.abs(display/natural-1),withinParent:r.left>=p.left-1&&r.right<=p.right+1&&r.top>=p.top-1&&r.bottom<=p.bottom+1};
                   });
                 });
-                assert.equal(composition.length,7);
+                assert.equal(composition.length,8);
                 assert(composition.every(x=>x.width>0&&x.height>0&&x.fit==='contain'&&x.transform==='none'&&x.ratioError<0.012&&x.withinParent),JSON.stringify(composition));
                 for(const card of await page.locator('#music .music-card').all()){
                   await card.hover();
@@ -148,14 +149,13 @@ jobs:
                 const documentary=await page.evaluate(async()=>{
                   const allowed=['images/web/hero-1280.webp','images/editorial/night-session.jpg','images/editorial/indoor-session.jpg','images/editorial/street-live.webp','images/image.jpg','images/live-20260910.jpg'];
                   const gallery=[...document.querySelectorAll('#gallery img')].map(e=>e.getAttribute('src'));
-                  const bg=getComputedStyle(document.querySelector('.performance-background')).backgroundImage;
-                  const url=bg.match(/url\(["']?(.*?)["']?\)/)?.[1];
-                  const image=new Image(); image.src=url||''; await image.decode();
+                  const image=document.querySelector('#performance .performance-photo img'); await image.decode();
+                  const bg=image.currentSrc;
                   const ownerAllowed=['images/web/hero-1280.webp','images/editorial/night-city-live.webp','images/editorial/street-performance.webp','images/editorial/indoor-live-089s.webp','images/image.jpg','images/live-20260910.jpg'];
                   return {galleryMatch:JSON.stringify(gallery)===JSON.stringify(ownerAllowed),background:bg,backgroundWidth:image.naturalWidth,genreLabels:[...document.querySelectorAll('.music-art-label')].map(e=>({text:e.textContent,visible:e.getBoundingClientRect().height>0}))};
                 });
                 assert(documentary.galleryMatch,'Unexpected gallery source');
-                assert(documentary.background.includes('/images/image.jpg')&&documentary.backgroundWidth>0,'Performance background unavailable');
+                assert(documentary.background.includes('/images/image.jpg')&&documentary.backgroundWidth>0,'Performance documentary photo unavailable');
                 assert(documentary.genreLabels.every(x=>x.visible&&x.text==='音楽イメージ'));
                 require('node:fs').writeFileSync('screenshots/documentary-'+width+'.json',JSON.stringify(documentary,null,2));
                 await page.locator('#performance').screenshot({path:'screenshots/performance-section-'+width+'.png'});
