@@ -1,0 +1,164 @@
+[
+  {
+    "source": "images/image.jpg",
+    "source_sha256": "4d3ac5d96faf4c256c45030f317906d73cc690dbb8096001cdbada5cba94c3f0",
+    "source_bytes": 9414710,
+    "source_size": [
+      4624,
+      3468
+    ],
+    "output": "images/web/ensemble-stone-640.webp",
+    "size": [
+      640,
+      480
+    ],
+    "bytes": 117906,
+    "sha256": "1b05fabad3d13f8ff0c293cbfa1326866f228089378010562efd58754e12c326",
+    "quality": 87,
+    "psnr_db": 34.969
+  },
+  {
+    "source": "images/image.jpg",
+    "source_sha256": "4d3ac5d96faf4c256c45030f317906d73cc690dbb8096001cdbada5cba94c3f0",
+    "source_bytes": 9414710,
+    "source_size": [
+      4624,
+      3468
+    ],
+    "output": "images/web/ensemble-stone-1280.webp",
+    "size": [
+      1280,
+      960
+    ],
+    "bytes": 487706,
+    "sha256": "7d4d5671706a2171f8625246a61a5018e8bde24ffa129f9d69fa50715e6885fd",
+    "quality": 87,
+    "psnr_db": 36.703
+  },
+  {
+    "source": "images/image.jpg",
+    "source_sha256": "4d3ac5d96faf4c256c45030f317906d73cc690dbb8096001cdbada5cba94c3f0",
+    "source_bytes": 9414710,
+    "source_size": [
+      4624,
+      3468
+    ],
+    "output": "images/web/ensemble-stone-1920.webp",
+    "size": [
+      1920,
+      1440
+    ],
+    "bytes": 1073848,
+    "sha256": "6bdaa9701d3c8fbce7051331891c279fdf036215e5a4bf92c5f0551dec04f96c",
+    "quality": 87,
+    "psnr_db": 37.485
+  },
+  {
+    "source": "images/music-breton.jpg",
+    "source_sha256": "c5ecc7722e28651adc7f369e7d28b71a89cb7a3c09328aefd6aeacac6be8073b",
+    "source_bytes": 3523497,
+    "source_size": [
+      1536,
+      1024
+    ],
+    "output": "images/web/music-breton-640.webp",
+    "size": [
+      640,
+      427
+    ],
+    "bytes": 101450,
+    "sha256": "bd37d0fa0e05a092dbe9ca8f4ed39cb0d401ec40130a532aa2ccd15fa7662b9e",
+    "quality": 87,
+    "psnr_db": 34.268
+  },
+  {
+    "source": "images/music-breton.jpg",
+    "source_sha256": "c5ecc7722e28651adc7f369e7d28b71a89cb7a3c09328aefd6aeacac6be8073b",
+    "source_bytes": 3523497,
+    "source_size": [
+      1536,
+      1024
+    ],
+    "output": "images/web/music-breton-1280.webp",
+    "size": [
+      1280,
+      853
+    ],
+    "bytes": 356422,
+    "sha256": "9a3d513e443870bbf71f196ef36e840a26c35ba683e80c8ea92f6c899195313b",
+    "quality": 87,
+    "psnr_db": 36.214
+  },
+  {
+    "source": "images/music-scottish.jpg",
+    "source_sha256": "b35b484438e7cb225882613bb87b5d4fdd577e8c8f628985b6dac1ac3a112a32",
+    "source_bytes": 337303,
+    "source_size": [
+      2048,
+      1365
+    ],
+    "output": "images/web/music-scottish-640.webp",
+    "size": [
+      640,
+      427
+    ],
+    "bytes": 54244,
+    "sha256": "3e39a7583998b1f2f02033a474e2476d167cda828ec445fecfa6ceac1a8cc630",
+    "quality": 87,
+    "psnr_db": 36.048
+  },
+  {
+    "source": "images/music-scottish.jpg",
+    "source_sha256": "b35b484438e7cb225882613bb87b5d4fdd577e8c8f628985b6dac1ac3a112a32",
+    "source_bytes": 337303,
+    "source_size": [
+      2048,
+      1365
+    ],
+    "output": "images/web/music-scottish-1280.webp",
+    "size": [
+      1280,
+      853
+    ],
+    "bytes": 173158,
+    "sha256": "624034bf3b039628040b9ee38008295526110ad15f42a5253a51bc149901f4b2",
+    "quality": 87,
+    "psnr_db": 38.2
+  },
+  {
+    "source": "images/music-world.jpg",
+    "source_sha256": "e140e543dca7ee6b66aa59d62fd366a37cf88e90e0210a6c25afafb14fe07731",
+    "source_bytes": 3269505,
+    "source_size": [
+      1535,
+      1024
+    ],
+    "output": "images/web/music-world-640.webp",
+    "size": [
+      640,
+      427
+    ],
+    "bytes": 114152,
+    "sha256": "acad19de4cb292d3297efae128d4a26843937d633f3280a3df5c35443f3933cf",
+    "quality": 87,
+    "psnr_db": 33.924
+  },
+  {
+    "source": "images/music-world.jpg",
+    "source_sha256": "e140e543dca7ee6b66aa59d62fd366a37cf88e90e0210a6c25afafb14fe07731",
+    "source_bytes": 3269505,
+    "source_size": [
+      1535,
+      1024
+    ],
+    "output": "images/web/music-world-1280.webp",
+    "size": [
+      1280,
+      854
+    ],
+    "bytes": 387358,
+    "sha256": "dc6bf848a51b49008bc456989227c18affe8577de462c2aaffc267a5fbd21350",
+    "quality": 87,
+    "psnr_db": 35.617
+  }
+]
