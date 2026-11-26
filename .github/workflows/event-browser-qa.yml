@@ -7,6 +7,8 @@ on:
       - 'index.html'
       - 'style.css'
       - 'images/**'
+      - 'scripts/optimize_delivery_images.py'
+      - 'delivery-image-report.json'
       - 'sitemap.xml'
       - '.github/workflows/event-browser-qa.yml'
 permissions:
@@ -29,6 +31,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Generate or verify responsive delivery images
+        run: |
+          python3 -m venv /tmp/delivery-images
+          /tmp/delivery-images/bin/pip install Pillow==11.3.0
+          if test -f delivery-image-report.json; then
+            /tmp/delivery-images/bin/python scripts/optimize_delivery_images.py --verify --comparisons
+          else
+            /tmp/delivery-images/bin/python scripts/optimize_delivery_images.py --comparisons
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: delivery-image-binaries
+          path: |
+            images/web/ensemble-stone-*.webp
+            images/web/music-breton-*.webp
+            images/web/music-scottish-*.webp
+            images/web/music-world-*.webp
+            delivery-image-report.json
       - name: Verify editorial photo provenance and source links
         run: |
           python3 - <<'PY'
@@ -109,7 +129,7 @@ jobs:
                 const overflow=await page.evaluate(()=>({viewport:innerWidth,document:document.documentElement.scrollWidth,offenders:[...document.querySelectorAll('body *')].map(e=>({tag:e.tagName,cls:String(e.className),right:e.getBoundingClientRect().right,left:e.getBoundingClientRect().left,width:e.scrollWidth})).filter(e=>e.right>innerWidth+1||e.left< -1).slice(0,60)})); require('node:fs').writeFileSync('screenshots/overflow-'+width+'.json',JSON.stringify(overflow,null,2)); console.log('OVERFLOW',JSON.stringify(overflow)); assert(overflow.document<=width,'Home horizontal overflow at '+width);
                 assert.equal(await page.locator('#event').getAttribute('required'),null);
                 const optimized=await page.evaluate(async()=>{const imgs=[...document.querySelectorAll('img[srcset*="images/web/"]')];await Promise.all(imgs.map(async i=>{i.loading='eager';await i.decode()}));return imgs.map(i=>({src:i.currentSrc,width:i.naturalWidth}))});
-                assert.equal(optimized.length,4);
+                assert.equal(optimized.length,9);
                 assert(optimized.every(i=>i.width>0 && i.src.endsWith('.webp')));
                 const gallery=await page.evaluate(async()=>{const imgs=[...document.querySelectorAll('#gallery img')];return Promise.all(imgs.map(async i=>{i.loading='eager';try{await i.decode()}catch{}return {src:i.getAttribute('src'),width:i.naturalWidth}}))});
                 assert.equal(gallery.length,6); require('node:fs').writeFileSync('screenshots/gallery-decode-'+width+'.json',JSON.stringify(gallery,null,2)); assert(gallery.every(i=>i.width>0),JSON.stringify(gallery));
@@ -151,15 +171,15 @@ jobs:
                 assert.equal(await page.locator('#works img').count(),0);
                 assert.equal(await page.locator('#music .music-art-label').count(),6);
                 const documentary=await page.evaluate(async()=>{
-                  const allowed=['images/web/hero-1280.webp','images/editorial/night-session.jpg','images/editorial/indoor-session.jpg','images/editorial/street-live.webp','images/image.jpg','images/live-20260910.jpg'];
+                  const allowed=['images/web/hero-1280.webp','images/editorial/night-session.jpg','images/editorial/indoor-session.jpg','images/editorial/street-live.webp','images/web/ensemble-stone-1280.webp','images/live-20260910.jpg'];
                   const gallery=[...document.querySelectorAll('#gallery img')].map(e=>e.getAttribute('src'));
                   const image=document.querySelector('#performance .performance-photo img'); await image.decode();
                   const bg=image.currentSrc;
-                  const ownerAllowed=['images/web/hero-1280.webp','images/editorial/night-city-live.webp','images/editorial/street-performance.webp','images/editorial/indoor-live-089s.webp','images/image.jpg','images/live-20260910.jpg'];
+                  const ownerAllowed=['images/web/hero-1280.webp','images/editorial/night-city-live.webp','images/editorial/street-performance.webp','images/editorial/indoor-live-089s.webp','images/web/ensemble-stone-1280.webp','images/live-20260910.jpg'];
                   return {galleryMatch:JSON.stringify(gallery)===JSON.stringify(ownerAllowed),background:bg,backgroundWidth:image.naturalWidth,genreLabels:[...document.querySelectorAll('.music-art-label')].map(e=>({text:e.textContent,visible:e.getBoundingClientRect().height>0}))};
                 });
                 assert(documentary.galleryMatch,'Unexpected gallery source');
-                assert(documentary.background.includes('/images/image.jpg')&&documentary.backgroundWidth>0,'Performance documentary photo unavailable');
+                assert(/\/images\/web\/ensemble-stone-(640|1280|1920)\.webp$/.test(documentary.background)&&documentary.backgroundWidth>0,'Performance documentary photo unavailable');
                 assert(documentary.genreLabels.every(x=>x.visible&&x.text==='音楽イメージ'));
                 require('node:fs').writeFileSync('screenshots/documentary-'+width+'.json',JSON.stringify(documentary,null,2));
                 const links=await page.evaluate(()=>{
@@ -193,6 +213,12 @@ jobs:
                 await page.screenshot({path:'screenshots/home-'+width+'.png',fullPage:true});
                 const metrics=await page.evaluate(()=>{const n=performance.getEntriesByType('navigation')[0];return {domContentLoadedMs:n.domContentLoadedEventEnd,resources:performance.getEntriesByType('resource').map(r=>({url:r.name,transferBytes:r.transferSize,durationMs:r.duration})),images:[...document.images].map(i=>({src:i.getAttribute('src'),loading:i.loading}))}});
                 require('node:fs').writeFileSync('screenshots/performance-'+width+'.json',JSON.stringify(metrics,null,2));
+                const delivered=metrics.resources.filter(r=>r.url.startsWith('http://127.0.0.1:8765/glendalough/'));
+                const localBytes=delivered.reduce((sum,r)=>sum+r.transferBytes,0);
+                assert(!delivered.some(r=>/\/images\/(image|music-breton|music-scottish|music-world)\.jpg$/.test(r.url)),'Oversized source image requested');
+                assert(localBytes<5000000,'Local transfer exceeds 5 MB: '+localBytes);
+                require('node:fs').writeFileSync('screenshots/delivery-transfer-'+width+'.json',JSON.stringify({localBytes,resources:delivered},null,2));
+
                 const future=page.locator('.live-future'), recent=page.locator('.live-recent');
                 assert(await future.count()===1 && await recent.count()===1);
                 assert((await future.boundingBox()).y < (await recent.boundingBox()).y);
@@ -234,3 +260,50 @@ jobs:
         with:
           name: event-browser-screenshots
           path: screenshots/
+
+  register-delivery-images:
+    needs: browser
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'perf/responsive-delivery-images'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Check whether verified outputs need registration
+        id: pending
+        run: |
+          if test -f delivery-image-report.json; then echo 'needed=false' >> "$GITHUB_OUTPUT"; else echo 'needed=true' >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/download-artifact@v4
+        if: steps.pending.outputs.needed == 'true'
+        with:
+          name: delivery-image-binaries
+          path: .
+      - name: Verify exact artifact bytes and quality
+        if: steps.pending.outputs.needed == 'true'
+        run: |
+          python3 -m venv /tmp/delivery-images
+          /tmp/delivery-images/bin/pip install Pillow==11.3.0
+          /tmp/delivery-images/bin/python scripts/optimize_delivery_images.py --verify
+      - name: Register only tested derivatives on candidate branch
+        if: steps.pending.outputs.needed == 'true'
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git ls-remote --refs origin refs/heads/perf/responsive-delivery-images | awk '{print $1}')" = "$EXPECTED_HEAD"
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          rows=json.loads(Path("delivery-image-report.json").read_text())
+          expected={"delivery-image-report.json"} | {x["output"] for x in rows}
+          assert len(expected)==10
+          subprocess.run(["git","add","--",*sorted(expected)],check=True)
+          actual=set(subprocess.check_output(["git","diff","--cached","--no-renames","--name-only","-z"]).decode().split(chr(0)))-{""}
+          assert actual==expected,(actual,expected)
+          PY
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Register verified responsive WebP delivery assets'
+          git push origin HEAD:refs/heads/perf/responsive-delivery-images
