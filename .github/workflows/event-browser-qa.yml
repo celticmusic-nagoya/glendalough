@@ -31,15 +31,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Generate or verify responsive delivery images
+      - name: Verify registered responsive delivery images
         run: |
           python3 -m venv /tmp/delivery-images
           /tmp/delivery-images/bin/pip install Pillow==11.3.0
-          if test -f delivery-image-report.json; then
-            /tmp/delivery-images/bin/python scripts/optimize_delivery_images.py --verify --comparisons
-          else
-            /tmp/delivery-images/bin/python scripts/optimize_delivery_images.py --comparisons
-          fi
+          /tmp/delivery-images/bin/python scripts/optimize_delivery_images.py --verify --comparisons
       - uses: actions/upload-artifact@v4
         with:
           name: delivery-image-binaries
@@ -260,50 +256,3 @@ jobs:
         with:
           name: event-browser-screenshots
           path: screenshots/
-
-  register-delivery-images:
-    needs: browser
-    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'perf/responsive-delivery-images'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-      - name: Check whether verified outputs need registration
-        id: pending
-        run: |
-          if test -f delivery-image-report.json; then echo 'needed=false' >> "$GITHUB_OUTPUT"; else echo 'needed=true' >> "$GITHUB_OUTPUT"; fi
-      - uses: actions/download-artifact@v4
-        if: steps.pending.outputs.needed == 'true'
-        with:
-          name: delivery-image-binaries
-          path: .
-      - name: Verify exact artifact bytes and quality
-        if: steps.pending.outputs.needed == 'true'
-        run: |
-          python3 -m venv /tmp/delivery-images
-          /tmp/delivery-images/bin/pip install Pillow==11.3.0
-          /tmp/delivery-images/bin/python scripts/optimize_delivery_images.py --verify
-      - name: Register only tested derivatives on candidate branch
-        if: steps.pending.outputs.needed == 'true'
-        env:
-          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
-          test "$(git ls-remote --refs origin refs/heads/perf/responsive-delivery-images | awk '{print $1}')" = "$EXPECTED_HEAD"
-          python3 - <<'PY'
-          import json,subprocess
-          from pathlib import Path
-          rows=json.loads(Path("delivery-image-report.json").read_text())
-          expected={"delivery-image-report.json"} | {x["output"] for x in rows}
-          assert len(expected)==10
-          subprocess.run(["git","add","--",*sorted(expected)],check=True)
-          actual=set(subprocess.check_output(["git","diff","--cached","--no-renames","--name-only","-z"]).decode().split(chr(0)))-{""}
-          assert actual==expected,(actual,expected)
-          PY
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Register verified responsive WebP delivery assets'
-          git push origin HEAD:refs/heads/perf/responsive-delivery-images
