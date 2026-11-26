@@ -3572,3 +3572,44 @@ main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
  .mobile-nav.active{visibility:visible;pointer-events:auto;transform:none}
 }
 @media(max-width:600px){.film-stage{aspect-ratio:4/3}.music-film-card:last-child .film-stage{aspect-ratio:16/9}.film-stage:has(iframe){aspect-ratio:4/5}}
+
+/* Editorial rhythm: preserve visual hierarchy without stacking excessive margins. */
+:root{--section-space:clamp(72px,8.5vw,120px);--section-heading-space:clamp(38px,5vw,68px);--chapter-space:clamp(56px,7vw,96px)}
+#about.section,#works.section,#gallery.section,#contact.section,#live.live-section,#music.music-section{padding-block:var(--section-space)}
+#performance.performance-section{padding-block:var(--section-space)}
+.section-heading{margin-bottom:var(--section-heading-space)}
+#music .music-section-heading{margin-bottom:var(--section-heading-space)}
+#music .music-section-heading h2{font-size:clamp(50px,8.2vw,112px);line-height:.95}
+#music .music-category{margin-bottom:var(--chapter-space)}
+#music .music-category:last-of-type{margin-bottom:0}
+#music .music-video-area{margin-top:var(--chapter-space);padding-top:0}
+#music .music-video-heading{margin-bottom:28px}
+#music .music-video-description{margin:28px auto 0}
+#music .music-closing{margin-top:clamp(34px,4.5vw,64px)}
+#live .live-intro{margin:0 0 var(--section-heading-space) auto}
+#live .live-block{margin-top:0;margin-bottom:var(--chapter-space)}
+#live .live-future{padding-block:clamp(24px,3vw,40px)}
+#live .live-block-heading{margin-bottom:24px}
+#live .live-closing{padding-top:0}
+#contact .contact-content h2{font-size:clamp(31px,4.6vw,62px);line-height:1.13}
+#contact .contact-lead{margin-top:22px;line-height:1.9}
+#contact .contact-form-wrapper{max-width:960px;margin-top:clamp(32px,4vw,56px)}
+#contact .contact-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 26px;padding:clamp(24px,4vw,48px)}
+#contact .form-hint,#contact .form-group-wide,#contact .form-submit{grid-column:1/-1}
+#contact .form-hint{font-size:13px;line-height:1.8;color:#d1ccbd;border-bottom:1px solid rgba(232,227,213,.25);padding-bottom:18px}
+#contact .form-group{margin:0;min-width:0}
+#contact .form-group label{font-size:14px;line-height:1.6;letter-spacing:.025em}
+#contact .form-group label small,#contact .form-group label span{font-size:11px;color:#d5c7a4}
+#contact .form-group input,#contact .form-group select,#contact .form-group textarea{font-size:16px;min-height:48px;border-color:rgba(232,227,213,.45)}
+#contact .form-group input::placeholder,#contact .form-group textarea::placeholder{color:#a9a69d}
+#contact .form-submit{margin-top:6px}
+#contact .form-submit p{font-size:12px;color:#b9b5a8}
+@media(max-width:600px){
+ :root{--section-space:64px;--section-heading-space:32px;--chapter-space:48px}
+ #music .music-section-heading h2{font-size:clamp(44px,13vw,64px)}
+ #music .music-video-heading{margin-bottom:24px}
+ #music .music-card-grid{gap:24px}
+ #live .live-intro{margin-bottom:32px}
+ #contact .contact-form{grid-template-columns:minmax(0,1fr);gap:18px;padding:22px 16px}
+ #contact .form-hint{padding-bottom:14px}
+}
