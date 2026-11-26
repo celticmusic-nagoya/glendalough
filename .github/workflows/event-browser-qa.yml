@@ -81,6 +81,12 @@ jobs:
                   assert r['source_type']=='owner_supplied_video_frame',p
                   assert len(r['source_video_sha256'])==64 and r['nominal_second']>=0,p
                   assert r['location_verified'] is False,p
+          archived=json.loads(Path('images/editorial/thumbnail-provenance-archive.json').read_text())
+          assert len(archived)==3
+          html=Path('index.html').read_text()
+          for r in archived:
+              assert hashlib.sha256(Path(r['path']).read_bytes()).hexdigest()==r['sha256']
+              assert r['path'] in html and r['source_url'] in html
           print('Editorial source and image SHA verification PASS: 3/3')
           PY
       - run: npm install --no-save --package-lock=false playwright@1.51.1
@@ -178,10 +184,37 @@ jobs:
                 assert(/\/images\/web\/ensemble-stone-(640|1280|1920)\.webp$/.test(documentary.background)&&documentary.backgroundWidth>0,'Performance documentary photo unavailable');
                 assert(documentary.genreLabels.every(x=>x.visible&&x.text==='音楽イメージ'));
                 require('node:fs').writeFileSync('screenshots/documentary-'+width+'.json',JSON.stringify(documentary,null,2));
+                const films=await page.evaluate(async()=>{
+                  const stages=[...document.querySelectorAll('.film-stage')];
+                  const result=await Promise.all(stages.map(async s=>{const i=s.querySelector('img');i.loading='eager';await i.decode();return {id:s.dataset.videoId,image:i.getAttribute('src'),width:i.naturalWidth,fit:getComputedStyle(i).objectFit,button:s.querySelector('button')?.getAttribute('aria-label')}}));
+                  return {result,frames:document.querySelectorAll('iframe').length,externalScripts:[...document.scripts].filter(s=>/tiktok|instagram/.test(s.src)).length};
+                });
+                assert.equal(films.result.length,3);
+                assert(films.result.every(f=>f.width>0&&f.fit==='contain'&&f.button));
+                assert.equal(films.frames,0);
+                assert.equal(films.externalScripts,0);
+                assert.equal(await page.locator('.tiktok-film-link').getAttribute('href'),'https://www.tiktok.com/@glendalough.jp/video/7685398773727497493');
+                assert.equal(await page.locator('.instagram-media,.tiktok-embed').count(),0);
+                assert.equal(await page.locator('#mobileNav').getAttribute('aria-hidden'),'true');
+                assert(await page.locator('#mobileNav').evaluate(n=>n.inert&&getComputedStyle(n).visibility==='hidden'));
+                await page.locator('#music-video').screenshot({path:'screenshots/films-'+width+'.png',animations:'disabled'});
+                await page.locator('.past-events-grid').screenshot({path:'screenshots/past-films-'+width+'.png'});
+                // Use an intercepted local test player, never claim real remote playback.
+                await page.route('https://www.youtube-nocookie.com/**',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>QA fixture</title><p>Player fixture</p>'}));
+                const stage=page.locator('.film-stage').first();
+                await stage.locator('button.film-poster').focus();
+                await page.keyboard.press('Enter');
+                assert.equal(await stage.locator('iframe').count(),1);
+                assert((await stage.locator('iframe').getAttribute('src')).includes('-btG-2M4QXQ?autoplay=1'));
+                await stage.locator('.film-close').click();
+                assert.equal(await stage.locator('iframe').count(),0);
+                assert(await stage.locator('.film-poster').evaluate(b=>document.activeElement===b));
+                await page.unroute('https://www.youtube-nocookie.com/**');
+                require('node:fs').writeFileSync('screenshots/film-contract-'+width+'.json',JSON.stringify(films,null,2));
                 const links=await page.evaluate(()=>{
                   const social=[...document.querySelectorAll('#social .sns-links a')].map(a=>({href:a.href,height:a.getBoundingClientRect().height,fit:a.scrollWidth<=a.clientWidth+1}));
                   const video=[...document.querySelectorAll('#music-video .film-source-link')].map(a=>a.href);
-                  const reels=[...document.querySelectorAll('#live .past-film-link')].map(a=>a.href);
+                  const reels=[...document.querySelectorAll('#live .past-film-link:not(.tiktok-film-link)')].map(a=>a.href);
                   const anchors=[...document.querySelectorAll('a[href^="#"]')].filter(a=>a.getAttribute('href').length>1).map(a=>a.getAttribute('href')).filter(h=>!document.getElementById(h.slice(1)));
                   return {social,video,reels,anchors,headline:document.querySelector('#sns-title').getBoundingClientRect().width};
                 });
@@ -200,6 +233,8 @@ jobs:
                   assert.equal(await page.locator('#menuButton').getAttribute('aria-expanded'),'true');
                   await page.keyboard.press('Escape');
                   assert.equal(await page.locator('#menuButton').getAttribute('aria-expanded'),'false');
+                  assert(await page.locator('#mobileNav').evaluate(n=>n.inert&&getComputedStyle(n).visibility==='hidden'));
+                  assert(await page.locator('#menuButton').evaluate(b=>document.activeElement===b));
                 }
                 require('node:fs').writeFileSync('screenshots/navigation-'+width+'.json',JSON.stringify(links,null,2));
                 await page.locator('#social').screenshot({path:'screenshots/social-'+width+'.png'});
