@@ -3613,3 +3613,12 @@ main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
  #contact .contact-form{grid-template-columns:minmax(0,1fr);gap:18px;padding:22px 16px}
  #contact .form-hint{padding-bottom:14px}
 }
+
+/* Audit-driven fixes: paint the established hero immediately; do not animate its LCP image. */
+.hero-background{animation:none;transform:scale(1.02)}
+.hero .hero-reveal{animation:none;opacity:1;transform:none}
+@media(max-width:900px){.hero-background{background-image:url("images/web/hero2-1280.webp")}}
+@media(prefers-reduced-motion:reduce){.hero-background{transform:none}}
+.footer-bottom{color:#b9b5a8}
+.footer-bottom p{font-size:12px;line-height:1.7}
+#live :focus-visible{outline-color:#66502c}
