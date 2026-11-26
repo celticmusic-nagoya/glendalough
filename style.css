@@ -3550,3 +3550,17 @@ main section[id]{scroll-margin-top:calc(var(--header-height) + 20px)}
 .back-to-top{gap:10px;font-family:var(--display);font-size:10px;letter-spacing:.12em;color:var(--editorial-gold)}
 @media(max-width:900px){#social .sns-box{grid-template-columns:minmax(0,1fr);gap:26px} .music-film-card{max-width:360px} .music-video-content{align-items:center}}
 @media(max-width:600px){#social.sns-section{padding:64px 0}#social .sns-box{padding:26px 20px;gap:24px}#social #sns-title{font-size:clamp(30px,8.5vw,42px)}#social .sns-links a{min-height:60px}.hero-actions{gap:8px 16px;margin-top:24px}.hero .hero-actions .button{min-width:0;padding-inline:18px}.hero-japanese{letter-spacing:.035em}.footer-nav{gap:2px 20px}}
+
+/* On-demand films: preserve thumbnail compositions; no external player until activation. */
+.film-stage{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:#101510;border:1px solid rgba(196,173,120,.23)}
+.film-poster{position:relative;display:grid;place-items:center;width:100%;height:100%;padding:0;border:0;background:#101510;color:#eee8d9;cursor:pointer;overflow:hidden;font:inherit}
+.film-poster img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;transition:filter .2s ease;filter:brightness(.86)}
+.film-poster:hover img{filter:brightness(1)}
+.film-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:58px;height:58px;border:1px solid #e9e3d4;border-radius:50%;background:rgba(10,15,10,.84);font-size:20px;padding-left:3px;color:#eee8d9}
+.film-preview-label{position:absolute;bottom:12px;left:12px;padding:6px 9px;background:rgba(10,15,10,.88);font-size:10px;letter-spacing:.18em;color:#e9e3d4}
+.film-poster:focus-visible,.film-close:focus-visible{outline:2px solid #d6b779;outline-offset:-4px}
+.film-stage iframe{display:block;width:100%;height:100%;border:0}
+.film-close{position:absolute;top:6px;right:6px;min-height:44px;padding:8px 12px;border:1px solid #d6b779;background:#101510;color:#eee8d9;cursor:pointer;font:inherit;font-size:12px}
+.past-event-with-video{display:flex;flex-direction:column;align-items:stretch}
+.past-event-with-video .past-film-link{margin-top:auto;padding-top:16px}
+@media(prefers-reduced-motion:reduce){.film-poster img{transition:none}}
