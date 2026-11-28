@@ -80,5 +80,59 @@
       1440
     ],
     "location_verified": false
+  },
+  {
+    "path": "images/editorial/gallery-street-ensemble.webp",
+    "sha256": "75e61e49ce7b5093fab8cbb537079d455a1895193f64b86e87027ce7055f47c6",
+    "source_type": "owner_supplied_video_frame",
+    "source_filename": "VID_20260819_032912_644_bsl.mp4",
+    "source_video_sha256": "438bb9d056246af336153b4c96b03e3a280b712784544799976d7ef5bb025605",
+    "nominal_second": 23.76,
+    "crop_resized_frame": [
+      0,
+      510,
+      1080,
+      1920
+    ],
+    "grade": {
+      "gamma": 0.76,
+      "contrast": 1.04,
+      "saturation": 0.97,
+      "unsharp_radius": 0.8,
+      "unsharp_percent": 35,
+      "unsharp_threshold": 5
+    },
+    "dimensions": [
+      900,
+      1175
+    ],
+    "location_verified": false
+  },
+  {
+    "path": "images/editorial/gallery-instrument-detail.webp",
+    "sha256": "b75e6b31bacf11e6434973d725ab42705f8cc63abe859304bc405a0196833a66",
+    "source_type": "owner_supplied_video_frame",
+    "source_filename": "VID20260910183229.mp4",
+    "source_video_sha256": "f43c562f68b7fc51c9166eb8fed9a68702ee8eee43edf688c9088a65e053e0f6",
+    "nominal_second": 25.3,
+    "crop_resized_frame": [
+      0,
+      400,
+      1080,
+      1100
+    ],
+    "grade": {
+      "gamma": 0.85,
+      "contrast": 1.035,
+      "saturation": 0.95,
+      "unsharp_radius": 0.8,
+      "unsharp_percent": 35,
+      "unsharp_threshold": 5
+    },
+    "dimensions": [
+      1080,
+      700
+    ],
+    "location_verified": false
   }
 ]

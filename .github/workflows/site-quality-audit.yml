@@ -1,0 +1,56 @@
+name: Website quality audit
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'style.css'
+      - 'en/**'
+      - 'events/**'
+      - 'images/**'
+      - 'scripts/audit_*.mjs'
+      - '.github/workflows/site-quality-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: site-quality-audit-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --package-lock=false playwright@1.51.1 axe-core@4.10.0 lighthouse@12.8.2
+      - run: npx playwright install --with-deps chromium
+      - name: Start local site matching GitHub Pages subpath
+        run: |
+          mkdir -p /tmp/audit-site/glendalough audit
+          cp -a index.html style.css images en events sitemap.xml robots.txt /tmp/audit-site/glendalough/
+          python3 -m http.server 8765 --directory /tmp/audit-site > /tmp/audit-http.log 2>&1 &
+          for n in $(seq 1 15); do curl -fsS http://127.0.0.1:8765/glendalough/ >/dev/null && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8765/glendalough/ >/dev/null
+          git rev-parse HEAD > audit/source-head.txt
+          google-chrome --version > audit/chrome-version.txt
+      - name: WCAG automated checks on four pages and mobile menu
+        run: node scripts/audit_accessibility.mjs
+      - name: Lighthouse simulated mobile and desktop
+        run: |
+          set -euo pipefail
+          export CHROME_PATH="$(command -v google-chrome)"
+          for profile in mobile desktop; do
+            extra=()
+            if [ "$profile" = desktop ]; then extra+=(--preset=desktop); fi
+            npx --no-install lighthouse http://127.0.0.1:8765/glendalough/ --quiet --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --output=json --output-path="audit/lighthouse-$profile.json" "${extra[@]}"
+          done
+          node scripts/audit_lighthouse_summary.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: website-quality-audit
+          path: audit/
