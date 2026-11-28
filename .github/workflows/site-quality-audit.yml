@@ -43,7 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           export CHROME_PATH="$(command -v google-chrome)"
-          for profile in mobile desktop; do
+          for profile in mobile mobile-2 mobile-3 desktop; do
             extra=()
             if [ "$profile" = desktop ]; then extra+=(--preset=desktop); fi
             npx --no-install lighthouse http://127.0.0.1:8765/glendalough/ --quiet --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --output=json --output-path="audit/lighthouse-$profile.json" "${extra[@]}"
